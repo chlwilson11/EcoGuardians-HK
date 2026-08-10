@@ -27,6 +27,13 @@
   @keyframes eg-beacon { 0%,100% { opacity:.25; transform: scale(.9);} 50% { opacity:.85; transform: scale(1.12);} }
   @keyframes eg-rise { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform:none;} }
   @keyframes eg-drift { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-8px);} }
+  .eg-chat-sheet { inset: auto 0 0 0; width: 100%; border-radius: var(--radius-lg, 28px) var(--radius-lg, 28px) 0 0; height: min(84vh, 640px); }
+  @media (min-width: 720px) {
+    .eg-chat-sheet { inset: auto 16px 102px auto; width: min(420px, calc(100vw - 32px)); border-radius: var(--radius-lg, 28px); height: min(72vh, 620px); }
+  }
+  @keyframes eg-beacon-pop { from { opacity:0; transform: scale(.72); } to { opacity:1; transform: scale(1); } }
+  @keyframes eg-sheet-up { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform:none; } }
+  @keyframes eg-fade-slide { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform:none; } }
   @keyframes eg-dots { 0%,80%,100% { opacity:.25;} 40% { opacity:1;} }
   @keyframes eg-scroll { from { transform: translateX(0);} to { transform: translateX(-160px);} }
   @keyframes eg-wave { 0% { transform: scale(.4); opacity:.75;} 100% { transform: scale(1.9); opacity:0;} }
@@ -50,6 +57,14 @@
   @keyframes eg-parallax-far { from { transform: translateX(0);} to { transform: translateX(-50%);} }
   @keyframes eg-dust { 0% { transform: translateY(0) translateX(0); opacity:0;} 20% { opacity:.5;} 100% { transform: translateY(-160px) translateX(24px); opacity:0;} }
   @keyframes eg-breathe-room { 0%,100% { transform: scale(1);} 50% { transform: scale(1.012);} }
+  @media print {
+    body { background:#fff !important; }
+    .eg-noprint { display:none !important; }
+    .eg-cert-wrap { position:static !important; inset:auto !important; padding:0 !important; background:#fff !important; overflow:visible !important; }
+    .eg-cert { box-shadow:none !important; animation:none !important; border:2.5pt solid #c67139 !important; margin:0 auto !important; max-width:100% !important; page-break-inside:avoid; }
+    .eg-cert * { animation:none !important; }
+    @page { size: A4 landscape; margin: 12mm; }
+  }
 </style>
 <style>
   @keyframes eg-dim { 0% { opacity:.9;} 100% { opacity:.34;} }
@@ -88,6 +103,20 @@
   @keyframes eg-tick { 0% { opacity:0; transform: translateY(9px);} 100% { opacity:1; transform: translateY(0);} }
   @keyframes eg-sink { 0% { transform: translateY(-30px); opacity:0;} 100% { transform: translateY(0); opacity:1;} }
   @keyframes eg-shrinkout { 0% { transform: scale(1); opacity:.9;} 100% { transform: scale(.2); opacity:0;} }
+  @keyframes eg-particle { 0% { transform: translate(0,0) scale(.5); opacity:0;} 20% { opacity:1;} 100% { transform: translate(var(--px,0), var(--py,-120px)) scale(1.1); opacity:0;} }
+  @keyframes eg-happy { 0%,100% { transform: translateY(0) scale(1);} 30% { transform: translateY(-16px) scale(1.06);} 60% { transform: translateY(0) scale(1);} 80% { transform: translateY(-7px) scale(1.03);} }
+  @keyframes eg-countdown { from { width:100%; } to { width:0%; } }
+  @keyframes eg-badge-in { 0% { transform: translateY(14px) scale(.86); opacity:0;} 100% { transform: translateY(0) scale(1); opacity:1;} }
+  @keyframes eg-cert-in { 0% { opacity:0; transform: scale(.96) translateY(14px);} 100% { opacity:1; transform: scale(1) translateY(0);} }
+  @keyframes eg-underline { 0% { transform: scaleX(0);} 100% { transform: scaleX(1);} }
+  @keyframes eg-stagger-in { 0% { opacity:0; transform: translateY(12px) scale(.97);} 100% { opacity:1; transform: translateY(0) scale(1);} }
+  @keyframes eg-soft-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(198,113,57,0);} 50% { box-shadow: 0 0 22px 4px rgba(198,113,57,.34);} }
+  @keyframes eg-bubble-in { 0% { opacity:0; transform: translateY(10px);} 100% { opacity:1; transform: translateY(0);} }
+  @keyframes eg-seal-in { 0% { opacity:0; transform: rotate(-8deg) scale(.86);} 100% { opacity:1; transform: rotate(-6deg) scale(1);} }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.15s !important; }
+    .eg-fade-only { animation: eg-rise .3s ease both !important; }
+  }
 </style>
 </helmet>
 
@@ -96,7 +125,7 @@
 
   <div style="position:fixed; inset:0; pointer-events:none; z-index:5; transition: box-shadow .6s ease; box-shadow: {{warnGlow}}"></div>
 
-  <header style="position:sticky; top:0; z-index:20; background:rgba(251,250,246,.94); backdrop-filter: blur(8px); border-bottom:1px solid rgba(198,113,57,.16)">
+  <header class="eg-noprint" style="position:sticky; top:0; z-index:20; background:rgba(251,250,246,.94); backdrop-filter: blur(8px); border-bottom:1px solid rgba(198,113,57,.16)">
     <div style="max-width:1120px; margin:0 auto; padding:12px 20px; display:flex; flex-wrap:wrap; gap:14px; align-items:center">
 
       <div style="display:flex; align-items:center; gap:10px; margin-right:4px">
@@ -112,7 +141,7 @@
             <span>感官負荷</span><span>{{loadLabel}}</span>
           </div>
           <div style="height:14px; border-radius:999px; background:var(--color-neutral-300, #dcd3c4); overflow:hidden">
-            <div style="height:100%; border-radius:999px; transition: width .5s ease, background .5s ease; width:{{loadPct}}; background:{{loadColor}}"></div>
+            <div style="height:100%; border-radius:999px; transition: width .6s cubic-bezier(.25,.1,.25,1), background .6s cubic-bezier(.25,.1,.25,1); width:{{loadPct}}; background:{{loadColor}}; animation:{{loadPulse}}"></div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:7px; padding:7px 13px; border-radius:999px; background:var(--color-neutral-200, #eee7db); white-space:nowrap">
@@ -135,7 +164,7 @@
   <main style="max-width:1120px; margin:0 auto; padding:26px 20px 20px">
 
     <sc-if value="{{isHomePractice}}" hint-placeholder-val="{{ true }}">
-      <div style="animation: eg-rise .5s ease both">
+      <div style="animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
         <div style="display:flex; flex-wrap:wrap; gap:28px; align-items:flex-end; margin-bottom:30px">
           <div style="flex:1 1 380px">
             <div style="font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--color-neutral-600, #82796a)">練習模式 Practice</div>
@@ -157,6 +186,19 @@
               </svg>
             </div>
           </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; background:var(--color-accent-2-200, #e1eecc); border-radius:var(--radius-lg, 28px); padding:18px 22px; margin-bottom:16px">
+          <div style="flex:1 1 220px">
+            <div style="font-size:17px; font-weight:700; margin-bottom:3px">刺激強度：你可以調低</div>
+            <div style="font-size:15px; color:var(--color-accent-2-800, #3d472b)">覺得太刺激？隨時撳「低」，所有章節即刻溫和啲。</div>
+          </div>
+          <div style="display:flex; gap:8px">
+            <sc-for list="{{intensityOpts}}" as="o" hint-placeholder-count="3">
+              <button onClick="{{o.pick}}" style="min-height:52px; min-width:64px; padding:0 20px; border-radius:999px; border:2px solid rgba(198,113,57,.35); cursor:pointer; font-size:17px; font-weight:700; transition: all .3s ease; background:{{o.bg}}; color:{{o.fg}}">{{o.label}}</button>
+            </sc-for>
+          </div>
+          <button onClick="{{toggleSfx}}" style="min-height:52px; padding:0 18px; border-radius:999px; border:2px solid rgba(198,113,57,.35); cursor:pointer; font-size:16px; font-weight:600; color:var(--color-accent-700, #8c491a); transition: all .3s ease; background:{{sfxBg}}">{{sfxLabel}}</button>
         </div>
 
         <div style="display:flex; align-items:center; gap:18px; flex-wrap:wrap; background:var(--color-neutral-100, #f9f4ed); border-radius:var(--radius-lg, 28px); padding:20px 24px; margin-bottom:20px; box-shadow:var(--shadow-sm, 0 2px 10px rgba(32,30,29,.06))">
@@ -196,7 +238,7 @@
     </sc-if>
 
     <sc-if value="{{isHomeSafe}}" hint-placeholder-val="{{ false }}">
-      <div style="animation: eg-rise .5s ease both">
+      <div style="animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
         <div style="font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--color-neutral-600, #82796a)">安全模式 Safe mode</div>
         <h1 style="font-family: var(--font-heading, Caprasimo, serif); font-size:40px; line-height:1.15; margin:10px 0 10px; font-weight:400">呢度冇任何刺激。</h1>
         <p style="margin:0 0 26px; max-width:52ch; color:var(--color-neutral-700, #645c50); text-wrap:pretty">只有你自己揀嘅音樂、冷靜空間同小窩。想留幾耐都得，隨時可以返去練習，唔會有任何後果。</p>
@@ -252,7 +294,7 @@
     </sc-if>
 
     <sc-if value="{{isChapter}}" hint-placeholder-val="{{ false }}">
-      <div style="animation: eg-rise .5s ease both">
+      <div style="animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
         <button onClick="{{leaveChapter}}" style="min-height:52px; padding:0 20px 0 14px; border-radius:999px; border:2px solid rgba(198,113,57,.3); background:transparent; color:var(--color-accent, #c67139); font-size:16px; font-weight:600; cursor:pointer; margin-bottom:18px; display:inline-flex; align-items:center; gap:8px" style-hover="background:rgba(174,191,146,.28)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
           隨時可以離開，唔會有後果
@@ -292,9 +334,17 @@
               </div>
 
               <sc-if value="{{showBeacon}}" hint-placeholder-val="{{ false }}">
-                <div style="display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:var(--radius-md, 16px); background:rgba(246,160,107,.16); margin-bottom:16px">
-                  <span style="width:22px; height:22px; border-radius:999px; background:var(--color-accent-400, #f6a06b); animation: eg-beacon 1.6s ease-in-out infinite; flex:none"></span>
-                  <div style="font-size:17px; font-weight:600; color:var(--color-accent-800, #643312)">預告：{{beaconText}}（{{beaconCount}} 秒）</div>
+                <div style="display:flex; align-items:center; gap:18px; padding:18px 20px; border-radius:var(--radius-md, 16px); background:rgba(246,160,107,.18); margin-bottom:16px">
+                  <div style="flex:none; width:72px; height:72px; border-radius:999px; background:var(--color-accent-400, #f6a06b); display:grid; place-items:center; box-shadow:0 6px 20px rgba(198,113,57,.28)">
+                    <span key="{{beaconCount}}" style="font-family: var(--font-heading, Caprasimo, serif); font-size:38px; line-height:1; color:var(--color-neutral-100, #f9f4ed); animation: eg-beacon-pop .5s cubic-bezier(.25,.1,.25,1) both">{{beaconCount}}</span>
+                  </div>
+                  <div style="flex:1; min-width:0">
+                    <div style="font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--color-accent-700, #8c491a); margin-bottom:4px">預告 · 數到零就會發生</div>
+                    <div style="font-size:19px; font-weight:700; color:var(--color-accent-800, #643312); margin-bottom:8px">{{beaconText}}</div>
+                    <div style="height:8px; border-radius:999px; background:rgba(198,113,57,.2); overflow:hidden">
+                      <div style="height:100%; border-radius:999px; background:var(--color-accent, #c67139); transition: width 1s linear; width:{{beaconPct}}"></div>
+                    </div>
+                  </div>
                 </div>
               </sc-if>
 
@@ -303,7 +353,7 @@
               </sc-if>
 
               <sc-if value="{{showPanelFeedback}}" hint-placeholder-val="{{ false }}">
-                <div style="border-radius:var(--radius-md, 16px); padding:18px; margin-bottom:16px; animation: eg-rise .4s ease both; background:{{fbBg}}; border:1px solid {{fbBorder}}">
+                <div style="border-radius:var(--radius-md, 16px); padding:18px; margin-bottom:16px; animation: eg-rise .5s cubic-bezier(.25,.1,.25,1) both; background:{{fbBg}}; border:1px solid {{fbBorder}}">
                   <div style="font-size:14px; font-weight:700; letter-spacing:.1em; color:var(--color-neutral-600, #82796a); margin-bottom:6px">{{fbKicker}}</div>
                   <p style="margin:0 0 10px; font-size:18px; text-wrap:pretty">{{fbText}}</p>
                   <sc-if value="{{fbUnlocked}}" hint-placeholder-val="{{ false }}">
@@ -328,7 +378,7 @@
                 <p style="margin:0 0 16px; font-size:15px; color:var(--color-neutral-600, #82796a)">每張卡有文字、圖示同廣東話語音。撳喇叭聽讀出嚟。</p>
                 <div style="display:grid; gap:12px">
                   <sc-for list="{{cards}}" as="card" hint-placeholder-count="3">
-                    <div style="display:flex; align-items:stretch; gap:10px">
+                    <div style="display:flex; align-items:stretch; gap:10px; animation: eg-stagger-in .6s cubic-bezier(.25,.1,.25,1) {{card.delay}} both">
                       <button onClick="{{card.choose}}" style="flex:1; display:flex; align-items:center; gap:14px; text-align:left; min-height:76px; padding:14px 16px; border-radius:var(--radius-md, 16px); border:2px solid rgba(198,113,57,.22); background:#FFFFFF; cursor:pointer; font-size:18px; font-weight:600; color:var(--color-text, #201e1d); transition: all .35s ease" style-hover="border-color:var(--color-accent, #c67139); background:rgba(174,191,146,.22)">
                         <span style="flex:none; width:60px; height:60px; border-radius:var(--radius-md, 16px); background:var(--color-accent-2-200, #e1eecc); display:grid; place-items:center">
                           <sc-if value="{{card.isLamp}}" hint-placeholder-val="{{ false }}">
@@ -369,9 +419,18 @@
             </sc-if>
 
             <sc-if value="{{showChapterDone}}" hint-placeholder-val="{{ false }}">
-              <div style="background:rgba(174,191,146,.3); border-radius:var(--radius-lg, 28px); padding:26px; animation: eg-rise .5s ease both">
+              <div style="background:rgba(174,191,146,.3); border-radius:var(--radius-lg, 28px); padding:26px; animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
                 <div style="font-family: var(--font-heading, Caprasimo, serif); font-size:24px; margin-bottom:10px; font-weight:400">呢一章完成喇</div>
                 <p style="margin:0 0 18px; color:var(--color-neutral-800, #474238); text-wrap:pretty">{{doneText}}</p>
+                <sc-if value="{{showZoneCompare}}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:var(--color-neutral-100, #f9f4ed); border-radius:var(--radius-md, 16px); padding:16px 20px; margin-bottom:16px">
+                    <span style="font-size:15px; font-weight:600; color:var(--color-neutral-700, #645c50)">開始前</span>
+                    <span style="padding:10px 20px; border-radius:999px; font-size:17px; font-weight:700; background:{{zoneBeforeChip.c}}; color:{{zoneBeforeChip.ink}}">{{zoneBeforeChip.label}}</span>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-600, #82796a)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+                    <span style="font-size:15px; font-weight:600; color:var(--color-neutral-700, #645c50)">而家</span>
+                    <span style="padding:10px 20px; border-radius:999px; font-size:17px; font-weight:700; background:{{zoneAfterChip.c}}; color:{{zoneAfterChip.ink}}; animation: eg-badge-in .6s ease both">{{zoneAfterChip.label}}</span>
+                  </div>
+                </sc-if>
                 <sc-if value="{{showAllDone}}" hint-placeholder-val="{{ false }}">
                   <div style="background:var(--color-neutral-100, #f9f4ed); border-radius:var(--radius-md, 16px); padding:18px 20px; margin-bottom:16px">
                     <div style="font-size:18px; font-weight:700; margin-bottom:6px">六章全部完成</div>
@@ -388,9 +447,73 @@
     </sc-if>
 
     <sc-if value="{{isSanctuary}}" hint-placeholder-val="{{ false }}">
-      <div style="animation: eg-rise .5s ease both">
+      <div style="animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
         <div style="font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--color-neutral-600, #82796a)">冷靜空間 Sanctuary</div>
         <h2 style="font-family: var(--font-heading, Caprasimo, serif); font-size:36px; margin:8px 0 22px; font-weight:400">慢慢嚟，冇人等緊你。</h2>
+
+        <div style="background:var(--color-neutral-100, #f9f4ed); border:1px solid rgba(198,113,57,.16); border-radius:var(--radius-lg, 28px); padding:24px; margin-bottom:18px">
+          <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px">
+            <div style="font-family: var(--font-heading, Caprasimo, serif); font-size:24px; font-weight:400">心情信箱</div>
+            <div style="font-size:14px; color:var(--color-neutral-600, #82796a)">Mood mailbox</div>
+          </div>
+          <p style="margin:0 0 16px; font-size:16px; color:var(--color-neutral-700, #645c50); text-wrap:pretty">而家想講嘅話，寫落嚟就得。可以只留畀自己，亦可以畀家長睇。冇人會評價你寫咩。</p>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px">
+            <sc-for list="{{notePhrases}}" as="p" hint-placeholder-count="4">
+              <button onClick="{{p.use}}" style="min-height:48px; padding:0 15px; border-radius:999px; border:2px solid rgba(198,113,57,.24); background:transparent; color:var(--color-accent-800, #643312); font-size:15px; font-weight:600; cursor:pointer; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:rgba(246,160,107,.2)">{{p.label}}</button>
+            </sc-for>
+          </div>
+
+          <textarea value="{{noteDraft}}" onChange="{{onNoteDraft}}" placeholder="今日想講…" rows="3" style="width:100%; border-radius:var(--radius-md, 16px); border:2px solid rgba(198,113,57,.24); padding:13px 16px; font-size:17px; line-height:1.6; background:#FFFFFF; color:var(--color-text, #201e1d); resize:vertical; min-height:96px"></textarea>
+
+          <div style="font-size:14px; font-weight:700; letter-spacing:.08em; color:var(--color-neutral-600, #82796a); margin:14px 0 8px">而家係咩心情？（唔想揀都得）</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px">
+            <sc-for list="{{noteZones}}" as="z" hint-placeholder-count="4">
+              <button onClick="{{z.pick}}" style="min-height:52px; padding:0 18px; border-radius:999px; border:2px solid {{z.border}}; cursor:pointer; font-size:15.5px; font-weight:700; transition: all .4s cubic-bezier(.25,.1,.25,1); background:{{z.bg}}; color:{{z.fg}}">{{z.label}}</button>
+            </sc-for>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px">
+            <button onClick="{{setNoteShare}}" style="flex:1 1 210px; min-height:56px; border-radius:var(--radius-md, 16px); border:2px solid {{shareBorder}}; cursor:pointer; font-size:16px; font-weight:700; padding:0 16px; text-align:left; transition: all .4s cubic-bezier(.25,.1,.25,1); background:{{shareBg}}; color:{{shareFg}}">畀家長睇</button>
+            <button onClick="{{setNotePrivate}}" style="flex:1 1 210px; min-height:56px; border-radius:var(--radius-md, 16px); border:2px solid {{privBorder}}; cursor:pointer; font-size:16px; font-weight:700; padding:0 16px; text-align:left; transition: all .4s cubic-bezier(.25,.1,.25,1); background:{{privBg}}; color:{{privFg}}">只留畀自己</button>
+          </div>
+
+          <button onClick="{{addNote}}" style="width:100%; min-height:56px; border-radius:999px; border:none; background:var(--color-accent, #c67139); color:var(--color-neutral-100, #f9f4ed); font-size:17px; font-weight:700; cursor:pointer; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-700, #8c491a)">放入信箱</button>
+          <div style="min-height:24px; margin-top:10px; font-size:15px; color:var(--color-accent-2-800, #3d472b)">{{noteMsg}}</div>
+          <sc-if value="{{storageBlocked}}" hint-placeholder-val="{{ false }}">
+            <div style="border-radius:var(--radius-md, 16px); padding:14px 16px; background:rgba(246,160,107,.2); font-size:15px; color:var(--color-accent-800, #643312); line-height:1.55">呢部裝置（或無痕模式）暫時保存唔到。你仍然可以寫，但閂咗個頁面就會冇。</div>
+          </sc-if>
+
+          <sc-if value="{{hasNotes}}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:8px; display:grid; gap:12px">
+              <sc-for list="{{myNotes}}" as="n" hint-placeholder-count="0">
+                <div style="border-radius:var(--radius-md, 16px); border:1px solid rgba(198,113,57,.16); padding:16px; background:var(--color-neutral-200, #eee7db)">
+                  <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:8px">
+                    <span style="font-size:13px; font-weight:700; padding:5px 11px; border-radius:999px; background:{{n.tagBg}}; color:{{n.tagFg}}">{{n.tag}}</span>
+                    <sc-if value="{{n.hasZone}}" hint-placeholder-val="{{ false }}">
+                      <span style="font-size:13px; font-weight:700; padding:5px 11px; border-radius:999px; background:{{n.zoneC}}; color:{{n.zoneInk}}">{{n.zoneLabel}}</span>
+                    </sc-if>
+                    <span style="font-size:13.5px; color:var(--color-neutral-600, #82796a)">{{n.when}}</span>
+                    <span style="flex:1"></span>
+                    <button onClick="{{n.speak}}" aria-label="讀出" style="width:44px; height:44px; border-radius:999px; border:none; background:rgba(246,160,107,.2); cursor:pointer; display:grid; place-items:center" style-hover="background:rgba(246,160,107,.36)">
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-800, #643312)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 9.5a4 4 0 0 1 0 5"></path></svg>
+                    </button>
+                    <button onClick="{{n.del}}" aria-label="刪走" style="width:44px; height:44px; border-radius:999px; border:none; background:var(--color-neutral-300, #dcd3c4); cursor:pointer; display:grid; place-items:center" style-hover="background:var(--color-neutral-400, #c0b49f)">
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-800, #474238)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"></path><path d="M9 7V5h6v2"></path><path d="M6 7l1 13h10l1-13"></path></svg>
+                    </button>
+                  </div>
+                  <p style="margin:0; font-size:16.5px; line-height:1.6; white-space:pre-wrap; text-wrap:pretty">{{n.text}}</p>
+                  <sc-if value="{{n.hasReply}}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:12px; border-radius:var(--radius-md, 16px); background:var(--color-accent-2-200, #e1eecc); padding:13px 15px">
+                      <div style="font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--color-accent-2-800, #3d472b); margin-bottom:5px">家長回覆</div>
+                      <p style="margin:0; font-size:16px; line-height:1.6; white-space:pre-wrap; text-wrap:pretty; color:var(--color-accent-2-900, #232a19)">{{n.reply}}</p>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:18px">
           <div style="background:var(--color-neutral-100, #f9f4ed); border:1px solid rgba(198,113,57,.16); border-radius:var(--radius-lg, 28px); padding:24px; text-align:center">
             <div style="font-family: var(--font-heading, Caprasimo, serif); font-size:22px; margin-bottom:4px; font-weight:400">水母呼吸節奏器</div>
@@ -411,6 +534,7 @@
             <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center">
               <button onClick="{{toggleBreath}}" style="min-height:52px; padding:0 26px; border-radius:999px; border:none; background:var(--color-accent, #c67139); color:var(--color-neutral-100, #f9f4ed); font-size:17px; font-weight:600; cursor:pointer" style-hover="background:var(--color-accent-700, #8c491a)">{{breathToggleLabel}}</button>
               <button onClick="{{toggleBreathSound}}" style="min-height:52px; padding:0 20px; border-radius:999px; border:2px solid rgba(122,138,94,.5); cursor:pointer; font-size:16px; font-weight:600; transition: all .3s ease; background:{{breathSoundBg}}; color:{{breathSoundFg}}">{{breathSoundLabel}}</button>
+              <button onClick="{{playComfort}}" style="min-height:52px; padding:0 20px; border-radius:999px; border:2px solid rgba(122,138,94,.5); background:transparent; color:var(--color-accent-2-700, #56633f); font-size:16px; font-weight:600; cursor:pointer" style-hover="background:rgba(174,191,146,.3)">{{comfortLabel}}</button>
               <button onClick="{{resetBreath}}" style="min-height:52px; padding:0 20px; border-radius:999px; border:2px solid rgba(198,113,57,.3); background:transparent; color:var(--color-accent, #c67139); font-size:16px; font-weight:600; cursor:pointer" style-hover="background:rgba(246,160,107,.2)">重新開始</button>
             </div>
           </div>
@@ -424,8 +548,108 @@
       </div>
     </sc-if>
 
+    <sc-if value="{{isCertificate}}" hint-placeholder-val="{{ false }}">
+      <div class="eg-cert-wrap" style="animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
+
+        <div class="eg-noprint">
+          <div style="font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--color-neutral-600, #82796a)">情緒穩定證書 Certificate</div>
+          <h2 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:36px; margin:8px 0 10px">畀自己一張證書。</h2>
+          <p style="margin:0 0 22px; max-width:50ch; color:var(--color-neutral-700, #645c50); text-wrap:pretty">寫低你嘅名或者花名，小音會為你發一張證書。你可以印出嚟貼喺房入面。</p>
+
+          <sc-if value="{{certPending}}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:26px">
+              <input value="{{certName}}" onChange="{{onCertName}}" placeholder="你嘅名或者花名" aria-label="你嘅名" style="flex:1 1 280px; min-height:56px; border-radius:999px; border:2px solid rgba(198,113,57,.3); padding:0 22px; font-size:19px; background:var(--color-neutral-100, #f9f4ed); color:var(--color-text, #201e1d)"></input>
+              <button onClick="{{issueCert}}" style="min-height:56px; padding:0 28px; border-radius:999px; border:none; background:var(--color-accent, #c67139); color:var(--color-neutral-100, #f9f4ed); font-size:18px; font-weight:600; cursor:pointer; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-700, #8c491a)">發出我嘅證書</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{certIssued}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:26px">
+              <button onClick="{{printCert}}" style="min-height:56px; padding:0 26px; border-radius:999px; border:none; background:var(--color-accent, #c67139); color:var(--color-neutral-100, #f9f4ed); font-size:18px; font-weight:600; cursor:pointer; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-700, #8c491a)">列印 / 存 PDF</button>
+              <button onClick="{{resetCert}}" style="min-height:56px; padding:0 24px; border-radius:999px; border:2px solid rgba(198,113,57,.3); background:transparent; color:var(--color-accent, #c67139); font-size:17px; font-weight:600; cursor:pointer; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:rgba(246,160,107,.2)">改名</button>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{certIssued}}" hint-placeholder-val="{{ false }}">
+          <div class="eg-cert" style="position:relative; overflow:hidden; max-width:760px; margin:0 auto; background:linear-gradient(155deg,#f2f7f6 0%,#f7f2f8 52%,#f4f0e4 100%); border:3px solid var(--color-accent-2-300, #ccdbb2); border-radius:var(--radius-lg, 28px); padding:clamp(28px,5vw,56px); box-shadow:var(--shadow-lg, 0 20px 50px rgba(32,30,29,.22)); animation: eg-cert-in .8s cubic-bezier(.25,.1,.25,1) both">
+
+            <div style="position:absolute; right:-70px; top:-70px; width:220px; height:220px; border-radius:999px; background:rgba(174,191,146,.24)"></div>
+            <div style="position:absolute; left:-56px; bottom:-56px; width:180px; height:180px; border-radius:999px; background:rgba(198,113,57,.13)"></div>
+
+            <div style="position:relative">
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:22px">
+                <span style="width:44px; height:44px; border-radius:999px; background:var(--color-accent-2-300, #ccdbb2); display:grid; place-items:center; flex:none">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-2-800, #3d472b)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"></path><circle cx="12" cy="11" r="2.4"></circle></svg>
+                </span>
+                <span style="font-size:14px; font-weight:700; letter-spacing:.16em; color:var(--color-neutral-600, #82796a)">星港守護者 · ECOGUARDIANS HK</span>
+              </div>
+
+              <h3 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:clamp(30px,5.4vw,46px); line-height:1.16; margin:0 0 6px; color:var(--color-text, #201e1d)">情緒穩定證書</h3>
+              <div style="font-size:clamp(15px,2.2vw,19px); color:var(--color-neutral-600, #82796a); letter-spacing:.04em; margin-bottom:30px">Certificate of Emotional Steadiness</div>
+
+              <div style="font-size:17px; color:var(--color-neutral-700, #645c50); margin-bottom:8px">頒發畀</div>
+              <div style="display:inline-block; position:relative; margin-bottom:26px">
+                <div style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:clamp(28px,5vw,42px); line-height:1.2; color:var(--color-accent-700, #8c491a); animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) .3s both">{{certDisplayName}}</div>
+                <div style="height:5px; border-radius:999px; background:var(--color-accent-2-400, #aebf92); transform-origin:left center; animation: eg-underline .7s cubic-bezier(.25,.1,.25,1) .55s both"></div>
+              </div>
+
+              <p style="margin:0 0 26px; font-size:clamp(16px,2.4vw,19px); line-height:1.75; color:var(--color-neutral-800, #474238); max-width:52ch; text-wrap:pretty">{{certBody}}</p>
+
+              <sc-if value="{{certHasPills}}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:30px">
+                <sc-for list="{{certPills}}" as="p" hint-placeholder-count="4">
+                  <span style="display:inline-flex; flex-direction:column; padding:12px 20px; border-radius:999px; background:rgba(255,255,255,.72); border:1.5px solid rgba(174,191,146,.55); animation: eg-stagger-in .6s cubic-bezier(.25,.1,.25,1) {{p.d}} both">
+                    <span style="font-size:16px; font-weight:700; color:var(--color-accent-2-800, #3d472b); line-height:1.3">{{p.t}}</span>
+                    <span style="font-size:12.5px; color:var(--color-neutral-600, #82796a); margin-top:1px">{{p.e}}</span>
+                  </span>
+                </sc-for>
+              </div>
+              </sc-if>
+
+              <div style="display:flex; gap:26px; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; padding-top:22px; border-top:1.5px solid rgba(198,113,57,.22)">
+                <div style="display:flex; gap:26px; flex-wrap:wrap">
+                  <div>
+                    <div style="font-family:var(--font-heading, Caprasimo, serif); font-size:26px; line-height:1.1; color:var(--color-accent-2-800, #3d472b)">{{certChapters}}</div>
+                    <div style="font-size:13.5px; color:var(--color-neutral-600, #82796a)">已完成章節</div>
+                  </div>
+                  <div>
+                    <div style="font-family:var(--font-heading, Caprasimo, serif); font-size:26px; line-height:1.1; color:var(--color-accent-2-800, #3d472b)">{{certCards}}</div>
+                    <div style="font-size:13.5px; color:var(--color-neutral-600, #82796a)">已解鎖策略卡</div>
+                  </div>
+                  <div>
+                    <div style="font-size:15px; font-weight:600; color:var(--color-neutral-800, #474238); margin-bottom:2px">{{certDate}}</div>
+                    <div style="font-size:13.5px; color:var(--color-neutral-600, #82796a)">發出日期</div>
+                  </div>
+                </div>
+
+                <div style="text-align:center; animation: eg-seal-in .7s cubic-bezier(.25,.1,.25,1) .5s both">
+                  <svg viewBox="0 0 120 120" width="76" height="76" aria-label="小音簽名" style="display:block; margin:0 auto 4px">
+                    <path d="M60 22c22 0 36 16 36 38 0 24-16 38-36 38S24 84 24 60c0-22 14-38 36-38z" fill="var(--color-accent-2-300, #ccdbb2)"></path>
+                    <path d="M34 34c-4-10 0-16 7-14 5 1.5 8 6 9 11" fill="var(--color-accent-2-300, #ccdbb2)"></path>
+                    <path d="M86 34c4-10 0-16-7-14-5 1.5-8 6-9 11" fill="var(--color-accent-2-300, #ccdbb2)"></path>
+                    <circle cx="47" cy="58" r="4.6" fill="var(--color-text, #201e1d)"></circle>
+                    <circle cx="73" cy="58" r="4.6" fill="var(--color-text, #201e1d)"></circle>
+                    <circle cx="38" cy="70" r="6" fill="var(--color-accent-400, #f6a06b)" opacity="0.5"></circle>
+                    <circle cx="82" cy="70" r="6" fill="var(--color-accent-400, #f6a06b)" opacity="0.5"></circle>
+                    <path d="M50 72q10 10 20 0" stroke="var(--color-text, #201e1d)" stroke-width="3" fill="none" stroke-linecap="round"></path>
+                  </svg>
+                  <div style="font-family:var(--font-heading, Caprasimo, serif); font-size:21px; color:var(--color-accent-700, #8c491a)">小音</div>
+                  <div style="font-size:12.5px; color:var(--color-neutral-600, #82796a)">你的守護夥伴</div>
+                </div>
+              </div>
+
+              <div style="margin-top:22px; padding:14px 18px; border-radius:var(--radius-md, 16px); background:rgba(255,255,255,.6); font-size:14.5px; line-height:1.6; color:var(--color-neutral-700, #645c50)">
+                這不是專業評估，而是對你努力的肯定。<span style="color:var(--color-neutral-600, #82796a)">This is not a clinical assessment — it is recognition of your effort.</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
     <sc-if value="{{isToolbox}}" hint-placeholder-val="{{ false }}">
-      <div style="animation: eg-rise .5s ease both">
+      <div style="animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
         <div style="font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--color-neutral-600, #82796a)">我的安全工具箱 Toolbox</div>
         <h2 style="font-family: var(--font-heading, Caprasimo, serif); font-size:36px; margin:8px 0 8px; font-weight:400">呢啲係你自己搵到嘅方法。</h2>
         <p style="margin:0 0 20px; max-width:52ch; color:var(--color-neutral-700, #645c50)">現實生活遇到同樣情況時，打開手機睇返呢一頁就得。</p>
@@ -446,6 +670,33 @@
           <span style="align-self:center; font-size:15px; color:var(--color-accent-2-700, #56633f)">{{copyMsg}}</span>
         </div>
 
+        <div style="background:var(--color-accent-2-200, #e1eecc); border-radius:var(--radius-lg, 28px); padding:22px 24px; margin-bottom:22px">
+          <div style="font-family:var(--font-heading, Caprasimo, serif); font-size:22px; margin-bottom:4px">現實提醒</div>
+          <p style="margin:0 0 14px; font-size:16px; color:var(--color-accent-2-800, #3d472b)">寫低幾時要記得打開工具箱。呢啲提醒會留喺部機到。</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px">
+            <input value="{{reminderDraft}}" onChange="{{onReminderDraft}}" placeholder="例如：搭港鐵前打開工具箱" style="flex:1 1 260px; min-height:52px; border-radius:999px; border:2px solid rgba(198,113,57,.3); padding:0 18px; font-size:17px; background:var(--color-neutral-100, #f9f4ed); color:var(--color-text, #201e1d)"></input>
+            <button onClick="{{addReminder}}" style="min-height:52px; padding:0 24px; border-radius:999px; border:none; background:var(--color-accent-2-600, #728157); color:var(--color-neutral-100, #f9f4ed); font-size:17px; font-weight:600; cursor:pointer" style-hover="background:var(--color-accent-2-700, #56633f)">加入</button>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px">
+            <sc-for list="{{reminderPresets}}" as="rp" hint-placeholder-count="3">
+              <button onClick="{{rp.add}}" style="min-height:46px; padding:0 16px; border-radius:999px; border:2px solid rgba(122,138,94,.45); background:transparent; color:var(--color-accent-2-800, #3d472b); font-size:15px; font-weight:600; cursor:pointer" style-hover="background:rgba(174,191,146,.34)">+ {{rp.text}}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{hasReminders}}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid; gap:10px">
+              <sc-for list="{{reminders}}" as="rm" hint-placeholder-count="0">
+                <div style="display:flex; align-items:center; gap:12px; background:var(--color-neutral-100, #f9f4ed); border-radius:var(--radius-md, 16px); padding:14px 18px">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-2-700, #56633f)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"></path><path d="M10.5 21a1.9 1.9 0 0 0 3 0"></path></svg>
+                  <span style="flex:1; font-size:17px; font-weight:600">{{rm.text}}</span>
+                  <button onClick="{{rm.remove}}" aria-label="刪除" style="flex:none; width:44px; height:44px; border-radius:999px; border:none; background:transparent; color:var(--color-neutral-600, #82796a); cursor:pointer; display:grid; place-items:center" style-hover="background:var(--color-neutral-200, #eee7db)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+
         <sc-if value="{{toolboxEmpty}}" hint-placeholder-val="{{ false }}">
           <div style="background:var(--color-neutral-100, #f9f4ed); border:1px dashed rgba(198,113,57,.3); border-radius:var(--radius-lg, 28px); padding:34px; text-align:center; color:var(--color-neutral-600, #82796a); font-size:17px">
             仲係空嘅。玩完一章，或者喺小窩收藏一句 AI 建議，就會出現喺呢度。
@@ -454,7 +705,7 @@
 
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px">
           <sc-for list="{{toolboxItems}}" as="t" hint-placeholder-count="0">
-            <div style="background:var(--color-neutral-100, #f9f4ed); border:1px solid rgba(198,113,57,.16); border-radius:var(--radius-lg, 28px); padding:20px">
+            <div style="background:var(--color-neutral-100, #f9f4ed); border:1px solid rgba(198,113,57,.16); border-radius:var(--radius-lg, 28px); padding:20px; animation: eg-stagger-in .6s cubic-bezier(.25,.1,.25,1) {{t.delay}} both">
               <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px">
                 <span style="font-size:13px; font-weight:700; letter-spacing:.1em; padding:5px 11px; border-radius:999px; background:{{t.tagBg}}; color:{{t.tagFg}}">{{t.kind}}</span>
                 <button onClick="{{t.speak}}" aria-label="讀出" style="width:52px; height:52px; min-height:52px; border-radius:999px; border:none; background:rgba(246,160,107,.18); cursor:pointer; display:grid; place-items:center" style-hover="background:rgba(246,160,107,.34)">
@@ -473,7 +724,7 @@
     </sc-if>
 
     <sc-if value="{{isDashboard}}" hint-placeholder-val="{{ false }}">
-      <div style="animation: eg-rise .5s ease both">
+      <div style="animation: eg-rise .6s cubic-bezier(.25,.1,.25,1) both">
         <div style="font-size:15px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--color-neutral-600, #82796a)">家長／治療師儀表板</div>
 
         <sc-if value="{{dashLocked}}" hint-placeholder-val="{{ true }}">
@@ -500,6 +751,38 @@
                 <div style="font-size:16px; color:var(--color-accent-2-800, #3d472b)">已玩 {{report.chaptersDone}} / 6 章 · 完成 {{report.totalPlays}} 次關卡 · {{report.cards}} 張策略卡</div>
               </div>
               <button onClick="{{openReport}}" style="min-height:52px; padding:0 24px; border-radius:999px; border:none; background:var(--color-accent-2-600, #728157); color:var(--color-neutral-100, #f9f4ed); font-size:17px; font-weight:600; cursor:pointer" style-hover="background:var(--color-accent-2-700, #56633f)">睇建議同報告</button>
+            </div>
+
+            <div style="background:var(--color-neutral-100, #f9f4ed); border:1px solid rgba(198,113,57,.16); border-radius:var(--radius-lg, 28px); padding:24px; margin-bottom:22px">
+              <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px">
+                <div style="font-family: var(--font-heading, Caprasimo, serif); font-size:24px; font-weight:400">孩子的心情信箱</div>
+                <div style="font-size:14px; color:var(--color-neutral-600, #82796a)">只顯示孩子選擇「畀家長睇」的訊息</div>
+              </div>
+              <p style="margin:0 0 16px; font-size:16px; color:var(--color-neutral-700, #645c50); text-wrap:pretty">孩子標記為「只留畀自己」的訊息不會出現在這裡。您可以在每則訊息下回覆，孩子下次打開信箱就會看到。</p>
+
+              <sc-if value="{{noSharedNotes}}" hint-placeholder-val="{{ true }}">
+                <div style="border-radius:var(--radius-md, 16px); padding:18px; background:var(--color-neutral-200, #eee7db); font-size:16px; color:var(--color-neutral-700, #645c50)">還沒有訊息。孩子在「冷靜空間」的心情信箱寫下並選擇分享後，就會出現在這裡。</div>
+              </sc-if>
+
+              <div style="display:grid; gap:14px">
+                <sc-for list="{{sharedNotes}}" as="n" hint-placeholder-count="0">
+                  <div style="border-radius:var(--radius-md, 16px); border:1px solid rgba(198,113,57,.16); padding:18px; background:var(--color-neutral-200, #eee7db)">
+                    <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:9px">
+                      <sc-if value="{{n.hasZone}}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size:13px; font-weight:700; padding:5px 11px; border-radius:999px; background:{{n.zoneC}}; color:{{n.zoneInk}}">{{n.zoneLabel}}</span>
+                      </sc-if>
+                      <span style="font-size:13.5px; color:var(--color-neutral-600, #82796a)">{{n.when}}</span>
+                    </div>
+                    <p style="margin:0 0 14px; font-size:17px; line-height:1.6; white-space:pre-wrap; text-wrap:pretty">{{n.text}}</p>
+                    <div style="font-size:13px; font-weight:700; letter-spacing:.08em; color:var(--color-neutral-600, #82796a); margin-bottom:7px">您的回覆</div>
+                    <textarea value="{{n.replyVal}}" onChange="{{n.onReply}}" placeholder="想同孩子講嘅話…" rows="2" style="width:100%; border-radius:var(--radius-md, 16px); border:2px solid rgba(198,113,57,.24); padding:12px 15px; font-size:16px; line-height:1.6; background:#FFFFFF; color:var(--color-text, #201e1d); resize:vertical; min-height:76px"></textarea>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px">
+                      <button onClick="{{n.save}}" style="min-height:52px; padding:0 22px; border-radius:999px; border:none; background:var(--color-accent-2-600, #728157); color:var(--color-neutral-100, #f9f4ed); font-size:16px; font-weight:700; cursor:pointer" style-hover="background:var(--color-accent-2-700, #56633f)">儲存回覆</button>
+                      <span style="font-size:14.5px; color:var(--color-accent-2-800, #3d472b)">{{n.replyState}}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
             </div>
 
             <sc-if value="{{dashEmpty}}" hint-placeholder-val="{{ false }}">
@@ -691,6 +974,15 @@
         </div>
       </sc-if>
 
+      <div style="position:absolute; inset:0; z-index:6; pointer-events:none; overflow:hidden">
+        <sc-for list="{{particles}}" as="pt" hint-placeholder-count="0">
+          <div style="position:absolute; left:{{pt.l}}; top:{{pt.t}}; width:{{pt.sz}}; height:{{pt.sz}}; border-radius:999px; background:{{pt.c}}; --px:{{pt.px}}; --py:{{pt.py}}; animation: eg-particle 1.6s ease-out {{pt.d}} both"></div>
+        </sc-for>
+        <sc-if value="{{showQuickWin}}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; left:50%; top:22%; transform:translateX(-50%); padding:12px 24px; border-radius:999px; background:var(--color-accent-2-500, #8fa073); color:var(--color-neutral-100, #f9f4ed); font-size:19px; font-weight:700; box-shadow:var(--shadow-lg, 0 20px 50px rgba(32,30,29,.22)); animation: eg-badge-in .6s ease both">好快手！負荷再降 8%</div>
+        </sc-if>
+      </div>
+
       <div key="{{effectKey}}" style="position:absolute; inset:0; z-index:3; pointer-events:none; overflow:hidden">
         <sc-if value="{{hasFxScene}}" hint-placeholder-val="{{ false }}">
           <div style="position:absolute; inset:0; background:{{fxSceneBg}}"></div>
@@ -770,7 +1062,10 @@
         <div style="width:100%; max-width:720px">
 
           <div style="display:flex; gap:14px; align-items:flex-end; margin-bottom:16px">
-            <div style="flex:none; width:86px; animation: eg-drift calc(var(--eg-speed,1) * 5s) ease-in-out infinite">
+            <div style="flex:none; width:86px; position:relative; animation:{{mascotAnim}}">
+              <sc-if value="{{hasMascotLine}}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; left:50%; bottom:100%; transform:translateX(-50%); margin-bottom:8px; white-space:nowrap; padding:9px 15px; border-radius:var(--radius-lg, 28px) var(--radius-lg, 28px) var(--radius-lg, 28px) 8px; background:var(--color-neutral-100, #f9f4ed); color:var(--color-text, #201e1d); font-size:16px; font-weight:600; box-shadow:var(--shadow-md, 0 10px 26px rgba(32,30,29,.10)); animation: eg-badge-in .5s ease both; z-index:4">{{mascotLine}}</div>
+              </sc-if>
               <svg viewBox="0 0 120 120" width="86" height="86" aria-label="小音">
                 <path d="M60 22c22 0 36 16 36 38 0 24-16 38-36 38S24 84 24 60c0-22 14-38 36-38z" fill="var(--color-accent-2-300, #ccdbb2)"></path>
                 <path d="M34 34c-4-10 0-16 7-14 5 1.5 8 6 9 11" fill="var(--color-accent-2-300, #ccdbb2)"></path>
@@ -788,7 +1083,7 @@
           </div>
 
           <sc-if value="{{showFeedback}}" hint-placeholder-val="{{ false }}">
-            <div style="border-radius:var(--radius-md, 16px); padding:16px 18px; margin-bottom:14px; animation: eg-rise .4s ease both; background:rgba(245,234,216,.96)">
+            <div style="border-radius:var(--radius-md, 16px); padding:16px 18px; margin-bottom:14px; animation: eg-rise .5s cubic-bezier(.25,.1,.25,1) both; background:rgba(245,234,216,.96)">
               <div style="font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--color-neutral-600, #82796a); margin-bottom:6px">{{fbKicker}}</div>
               <p style="margin:0 0 8px; font-size:17px; text-wrap:pretty">{{fbText}}</p>
               <sc-if value="{{fbUnlocked}}" hint-placeholder-val="{{ false }}">
@@ -800,10 +1095,23 @@
             </div>
           </sc-if>
 
+          <sc-if value="{{countdownRun}}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:14px">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:600; color:var(--color-bg, #f5ead8); margin-bottom:7px">
+                <span>快啲揀，負荷會停止上升</span>
+                <span>{{countdownLeft}}s</span>
+              </div>
+              <div style="height:10px; border-radius:999px; background:rgba(245,234,216,.28); overflow:hidden">
+                <div style="height:100%; border-radius:999px; background:{{countdownColor}}; animation: eg-countdown 10s linear both"></div>
+              </div>
+              <div style="font-size:14px; color:rgba(245,234,216,.72); margin-top:6px">時間到都唔會結束關卡，慢慢揀都得。</div>
+            </div>
+          </sc-if>
+
           <sc-if value="{{showCards}}" hint-placeholder-val="{{ false }}">
             <div style="display:grid; gap:10px">
               <sc-for list="{{cards}}" as="card" hint-placeholder-count="3">
-                <div style="display:flex; gap:8px">
+                <div style="display:flex; gap:8px; animation: eg-stagger-in .6s cubic-bezier(.25,.1,.25,1) {{card.delay}} both">
                   <button onClick="{{card.choose}}" style="flex:1; display:flex; align-items:center; gap:14px; text-align:left; min-height:72px; padding:12px 16px; border-radius:var(--radius-md, 16px); border:none; background:rgba(245,234,216,.96); cursor:pointer; font-size:17px; font-weight:600; color:var(--color-text, #201e1d); transition: all .3s ease" style-hover="background:#FFFFFF; transform:translateY(-2px)">
                     <span style="flex:none; width:56px; height:56px; border-radius:var(--radius-md, 16px); background:var(--color-accent-2-200, #e1eecc); display:grid; place-items:center">
                       <sc-if value="{{card.isLamp}}" hint-placeholder-val="{{ false }}">
@@ -1107,6 +1415,10 @@
         <h3 style="font-family: var(--font-heading, Caprasimo, serif); font-size:26px; margin:0 0 10px; font-weight:400">要不要一起去安靜的地方？</h3>
         <p style="margin:0 0 20px; color:var(--color-neutral-700, #645c50)">唔想都完全冇問題，我哋可以留喺度。</p>
         <div style="display:grid; gap:10px">
+          <button onClick="{{playComfort}}" style="min-height:52px; border-radius:999px; border:2px solid rgba(122,138,94,.5); background:var(--color-accent-2-200, #e1eecc); color:var(--color-accent-2-800, #3d472b); font-size:17px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:9px" style-hover="background:var(--color-accent-2-300, #ccdbb2)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 8.5a5 5 0 0 1 0 7"></path></svg>
+            {{comfortLabel}}
+          </button>
           <button onClick="{{acceptInvite}}" style="min-height:52px; border-radius:999px; border:none; background:var(--color-accent, #c67139); color:var(--color-neutral-100, #f9f4ed); font-size:17px; font-weight:600; cursor:pointer" style-hover="background:var(--color-accent-700, #8c491a)">好，一齊去</button>
           <button onClick="{{declineInvite}}" style="min-height:52px; border-radius:999px; border:2px solid rgba(198,113,57,.3); background:transparent; color:var(--color-accent, #c67139); font-size:17px; font-weight:600; cursor:pointer" style-hover="background:rgba(174,191,146,.28)">先不要</button>
         </div>
@@ -1114,7 +1426,7 @@
     </div>
   </sc-if>
 
-  <nav style="position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(251,250,246,.96); backdrop-filter: blur(8px); border-top:1px solid rgba(198,113,57,.16)">
+  <nav class="eg-noprint" style="position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(251,250,246,.96); backdrop-filter: blur(8px); border-top:1px solid rgba(198,113,57,.16)">
     <div style="max-width:1120px; margin:0 auto; padding:10px 16px; display:flex; gap:8px; justify-content:space-around">
       <sc-for list="{{navItems}}" as="n" hint-placeholder-count="4">
         <button onClick="{{n.go}}" style="flex:1; min-height:70px; border-radius:var(--radius-md, 16px); border:none; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:14px; font-weight:600; transition: background .3s ease; background:{{n.bg}}; color:{{n.fg}}" style-hover="background:rgba(174,191,146,.34)">
@@ -1123,6 +1435,9 @@
           </sc-if>
           <sc-if value="{{n.isBox}}" hint-placeholder-val="{{ false }}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="3"></rect><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"></path><path d="M3 12h18"></path></svg>
+          </sc-if>
+          <sc-if value="{{n.isCert}}" hint-placeholder-val="{{ false }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"></circle><path d="M8.5 14.5L7 22l5-2.5L17 22l-1.5-7.5"></path></svg>
           </sc-if>
           <sc-if value="{{n.isCalm}}" hint-placeholder-val="{{ false }}">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="3.5"></circle></svg>
@@ -1144,52 +1459,128 @@
   </sc-if>
 
   <sc-if value="{{chatOpen}}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed; right:16px; bottom:96px; z-index:65; width:min(380px, calc(100vw - 32px)); background:var(--color-neutral-100, #f9f4ed); border-radius:var(--radius-lg, 28px); box-shadow:0 20px 50px rgba(35,52,61,.22); border:1px solid rgba(198,113,57,.18); overflow:hidden; display:flex; flex-direction:column; max-height:min(620px, calc(100vh - 150px))">
-      <div style="padding:14px 16px; background:var(--color-accent-2-300, #ccdbb2); display:flex; align-items:center; justify-content:space-between; gap:10px">
-        <div style="font-weight:700; font-size:17px">AI 守護者小窩</div>
-        <button onClick="{{closeChat}}" aria-label="收埋" style="width:52px; height:52px; min-height:52px; border-radius:999px; border:none; background:rgba(255,255,255,.6); cursor:pointer; display:grid; place-items:center" style-hover="background:#FFFFFF">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-text, #201e1d)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
+    <div class="eg-chat-sheet" style="position:fixed; z-index:66; background:var(--color-neutral-100, #f9f4ed); box-shadow:0 -8px 60px rgba(32,30,29,.26); border:1px solid rgba(198,113,57,.16); display:flex; flex-direction:column; overflow:hidden; animation: eg-sheet-up .5s cubic-bezier(.25,.1,.25,1) both">
+
+      <div style="flex:none; padding:14px 16px 12px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(198,113,57,.12)">
+        <div style="flex:none; width:46px; height:46px; border-radius:999px; background:var(--color-accent-2-200, #e1eecc); display:grid; place-items:center; overflow:hidden">
+          <svg viewBox="0 0 120 120" width="40" height="40" aria-hidden="true">
+            <path d="M60 24c21 0 34 15 34 36 0 23-15 36-34 36S26 83 26 60c0-21 13-36 34-36z" fill="var(--color-accent-2-400, #aebf92)"></path>
+            <circle cx="48" cy="58" r="4.4" fill="var(--color-text, #201e1d)"></circle>
+            <circle cx="72" cy="58" r="4.4" fill="var(--color-text, #201e1d)"></circle>
+            <circle cx="39" cy="70" r="5.6" fill="var(--color-accent-400, #f6a06b)" opacity=".5"></circle>
+            <circle cx="81" cy="70" r="5.6" fill="var(--color-accent-400, #f6a06b)" opacity=".5"></circle>
+            <path d="M53 74q7 6 14 0" stroke="var(--color-text, #201e1d)" stroke-width="3" fill="none" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div style="flex:1; min-width:0">
+          <div style="font-family: var(--font-heading, Caprasimo, serif); font-size:19px; font-weight:400; line-height:1.2">小音</div>
+          <div style="font-size:13.5px; color:var(--color-neutral-600, #82796a); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{toneSubline}}</div>
+        </div>
+        <button onClick="{{toggleChatSettings}}" aria-label="設定" style="flex:none; width:52px; height:52px; border-radius:999px; border:none; cursor:pointer; display:grid; place-items:center; transition: background .4s cubic-bezier(.25,.1,.25,1); background:{{gearBg}}" style-hover="background:rgba(198,113,57,.16)">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-800, #643312)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+        </button>
+        <button onClick="{{closeChat}}" aria-label="收埋" style="flex:none; width:52px; height:52px; border-radius:999px; border:none; background:var(--color-neutral-200, #eee7db); cursor:pointer; display:grid; place-items:center" style-hover="background:var(--color-neutral-300, #dcd3c4)">
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="var(--color-text, #201e1d)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
         </button>
       </div>
 
-      <div style="display:flex; gap:6px; padding:10px 12px; overflow-x:auto; border-bottom:1px solid rgba(198,113,57,.14)">
-        <sc-for list="{{tones}}" as="t" hint-placeholder-count="5">
-          <button onClick="{{t.pick}}" style="flex:none; min-height:52px; padding:0 16px; border-radius:999px; border:2px solid rgba(198,113,57,.22); cursor:pointer; font-size:15px; font-weight:600; white-space:nowrap; transition: all .3s ease; background:{{t.bg}}; color:{{t.fg}}">{{t.label}}</button>
-        </sc-for>
-      </div>
+      <sc-if value="{{showChatSettings}}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none; padding:16px; background:var(--color-neutral-200, #eee7db); border-bottom:1px solid rgba(198,113,57,.14); max-height:52%; overflow-y:auto; animation: eg-fade-slide .45s cubic-bezier(.25,.1,.25,1) both">
 
-      <div ref="{{chatScrollRef}}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; min-height:200px">
+          <div style="font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--color-neutral-600, #82796a); margin-bottom:9px">小音同你講嘢嘅語氣</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(104px, 1fr)); gap:8px; margin-bottom:18px">
+            <sc-for list="{{tones}}" as="t" hint-placeholder-count="5">
+              <button onClick="{{t.pick}}" style="min-height:54px; padding:0 12px; border-radius:var(--radius-md, 16px); border:2px solid rgba(198,113,57,.22); cursor:pointer; font-size:15px; font-weight:600; transition: all .4s cubic-bezier(.25,.1,.25,1); background:{{t.bg}}; color:{{t.fg}}">{{t.label}}</button>
+            </sc-for>
+          </div>
+
+          <div style="font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--color-neutral-600, #82796a); margin-bottom:9px">朗讀用嘅聲音</div>
+          <sc-if value="{{hasVoiceOptions}}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+              <sc-for list="{{voiceOptions}}" as="v" hint-placeholder-count="0">
+                <button onClick="{{v.pick}}" style="min-height:50px; padding:0 16px; border-radius:999px; border:2px solid rgba(198,113,57,.24); cursor:pointer; font-size:14.5px; font-weight:600; transition: all .4s cubic-bezier(.25,.1,.25,1); background:{{v.bg}}; color:{{v.fg}}">{{v.label}}</button>
+              </sc-for>
+            </div>
+            <div style="font-size:13px; color:var(--color-neutral-600, #82796a); margin-bottom:18px">撳一下即刻試聽，揀好之後會記住。</div>
+          </sc-if>
+          <sc-if value="{{noVoiceOptions}}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:14px; color:var(--color-neutral-700, #645c50); line-height:1.55; margin-bottom:18px">呢部裝置未搵到中文語音。iOS 可以喺「設定 → 輔助使用 → 朗讀內容 → 語音」加入廣東話。</div>
+          </sc-if>
+
+          <div style="font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--color-neutral-600, #82796a); margin-bottom:9px">小音真人錄音</div>
+          <button onClick="{{playSample}}" style="width:100%; min-height:56px; border-radius:var(--radius-md, 16px); border:none; background:var(--color-accent-2-500, #8fa073); color:var(--color-neutral-100, #f9f4ed); font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-2-700, #56633f)">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 8.5a5 5 0 0 1 0 7"></path><path d="M20 5.5a9 9 0 0 1 0 13"></path></svg>
+            {{sampleLabel}}
+          </button>
+          <div style="font-size:13px; color:var(--color-neutral-600, #82796a); margin-top:8px; line-height:1.55">呢個係真人錄嘅八句核心語句。AI 即場生成嘅回覆會用上面揀嘅語音朗讀。</div>
+        </div>
+      </sc-if>
+
+      <div ref="{{chatScrollRef}}" style="flex:1 1 0; min-height:0; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px">
         <sc-for list="{{messages}}" as="m" hint-placeholder-count="1">
-          <div style="display:flex; flex-direction:column; align-items:{{m.align}}">
-            <sc-if value="{{m.hasTone}}" hint-placeholder-val="{{ false }}">
-              <div style="font-size:13px; font-weight:700; letter-spacing:.08em; margin-bottom:5px; color:{{m.toneChip}}">{{m.toneLabel}}</div>
-            </sc-if>
-            <div style="max-width:88%; padding:12px 15px; border-radius:var(--radius-md, 16px); font-size:16px; line-height:1.55; white-space:pre-wrap; text-wrap:pretty; background:{{m.bg}}; color:{{m.fg}}">{{m.text}}</div>
-            <sc-if value="{{m.canSave}}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex; gap:6px; margin-top:6px">
-                <button onClick="{{m.save}}" style="min-height:52px; padding:0 16px; border-radius:999px; border:2px solid rgba(198,113,57,.22); background:transparent; color:var(--color-accent, #c67139); font-size:14px; font-weight:600; cursor:pointer" style-hover="background:rgba(174,191,146,.3)">存入工具箱</button>
-                <button onClick="{{m.speak}}" style="min-height:52px; padding:0 16px; border-radius:999px; border:2px solid rgba(198,113,57,.22); background:transparent; color:var(--color-accent-800, #643312); font-size:14px; font-weight:600; cursor:pointer" style-hover="background:rgba(246,160,107,.28)">讀出</button>
+          <div style="display:flex; gap:9px; align-items:flex-start; flex-direction:{{m.row}}">
+            <sc-if value="{{m.isAi}}" hint-placeholder-val="{{ true }}">
+              <div style="flex:none; width:32px; height:32px; border-radius:999px; background:var(--color-accent-2-200, #e1eecc); display:grid; place-items:center; margin-top:2px">
+                <svg viewBox="0 0 120 120" width="26" height="26" aria-hidden="true">
+                  <path d="M60 24c21 0 34 15 34 36 0 23-15 36-34 36S26 83 26 60c0-21 13-36 34-36z" fill="var(--color-accent-2-400, #aebf92)"></path>
+                  <circle cx="48" cy="58" r="5" fill="var(--color-text, #201e1d)"></circle>
+                  <circle cx="72" cy="58" r="5" fill="var(--color-text, #201e1d)"></circle>
+                  <path d="M53 74q7 6 14 0" stroke="var(--color-text, #201e1d)" stroke-width="3.4" fill="none" stroke-linecap="round"></path>
+                </svg>
               </div>
             </sc-if>
+            <div style="flex:1 1 auto; min-width:0; display:flex; flex-direction:column; align-items:{{m.align}}">
+              <sc-if value="{{m.hasTone}}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12.5px; font-weight:700; letter-spacing:.06em; margin-bottom:4px; color:{{m.toneChip}}">{{m.toneLabel}}</div>
+              </sc-if>
+              <div style="max-width:min(88%, 520px); padding:13px 16px; border-radius:{{m.radius}}; font-size:16.5px; line-height:1.6; white-space:pre-wrap; text-wrap:pretty; background:{{m.bg}}; color:{{m.fg}}; transition: background .5s cubic-bezier(.25,.1,.25,1); animation: eg-bubble-in .5s cubic-bezier(.25,.1,.25,1) both">{{m.text}}</div>
+              <sc-if value="{{m.hasActs}}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:9px">
+                  <sc-for list="{{m.acts}}" as="a" hint-placeholder-count="0">
+                    <button onClick="{{a.run}}" style="min-height:50px; padding:0 18px; border-radius:999px; border:none; background:var(--color-accent-2-500, #8fa073); color:var(--color-neutral-100, #f9f4ed); font-size:15px; font-weight:700; cursor:pointer; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-2-700, #56633f)">{{a.label}}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{m.canSave}}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; gap:7px; margin-top:8px">
+                  <button onClick="{{m.speak}}" style="min-height:48px; padding:0 15px; border-radius:999px; border:2px solid rgba(198,113,57,.22); background:transparent; color:var(--color-accent-800, #643312); font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:7px" style-hover="background:rgba(246,160,107,.24)">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 9.5a4 4 0 0 1 0 5"></path></svg>
+                    讀出
+                  </button>
+                  <button onClick="{{m.save}}" style="min-height:48px; padding:0 15px; border-radius:999px; border:2px solid rgba(198,113,57,.22); background:transparent; color:var(--color-accent, #c67139); font-size:14px; font-weight:600; cursor:pointer" style-hover="background:rgba(174,191,146,.3)">存入工具箱</button>
+                </div>
+              </sc-if>
+            </div>
           </div>
         </sc-for>
         <sc-if value="{{chatBusy}}" hint-placeholder-val="{{ false }}">
-          <div style="align-self:flex-start; padding:12px 15px; border-radius:var(--radius-md, 16px); background:rgba(174,191,146,.34); display:flex; gap:5px">
-            <span style="width:8px; height:8px; border-radius:999px; background:var(--color-accent-700, #8c491a); animation: eg-dots 1.2s infinite"></span>
-            <span style="width:8px; height:8px; border-radius:999px; background:var(--color-accent-700, #8c491a); animation: eg-dots 1.2s infinite .2s"></span>
-            <span style="width:8px; height:8px; border-radius:999px; background:var(--color-accent-700, #8c491a); animation: eg-dots 1.2s infinite .4s"></span>
+          <div style="display:flex; gap:9px; align-items:center">
+            <div style="flex:none; width:32px; height:32px; border-radius:999px; background:var(--color-accent-2-200, #e1eecc)"></div>
+            <div style="padding:13px 16px; border-radius:var(--radius-md, 16px) var(--radius-md, 16px) var(--radius-md, 16px) 6px; background:var(--color-accent-2-200, #e1eecc); display:flex; gap:5px">
+              <span style="width:8px; height:8px; border-radius:999px; background:var(--color-accent-2-700, #56633f); animation: eg-dots 1.2s infinite"></span>
+              <span style="width:8px; height:8px; border-radius:999px; background:var(--color-accent-2-700, #56633f); animation: eg-dots 1.2s infinite .2s"></span>
+              <span style="width:8px; height:8px; border-radius:999px; background:var(--color-accent-2-700, #56633f); animation: eg-dots 1.2s infinite .4s"></span>
+            </div>
           </div>
         </sc-if>
       </div>
 
-      <div style="padding:12px; border-top:1px solid rgba(198,113,57,.14); display:flex; gap:8px">
-        <input value="{{chatInput}}" onChange="{{onChatInput}}" onKeyDown="{{onChatKey}}" placeholder="想講咩都得…" style="flex:1; min-height:52px; border-radius:999px; border:2px solid rgba(198,113,57,.24); padding:0 16px; font-size:17px; background:#FFFFFF; color:var(--color-text, #201e1d)"></input>
-        <button onClick="{{sendChat}}" aria-label="傳送" style="flex:none; width:52px; height:52px; border-radius:999px; border:none; background:var(--color-accent, #c67139); cursor:pointer; display:grid; place-items:center" style-hover="background:var(--color-accent-700, #8c491a)">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-100, #f9f4ed)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2.5-6L4 12z"></path></svg>
+      <div style="flex:none; padding:0 12px 4px; display:flex; gap:8px; overflow-x:auto">
+        <sc-for list="{{quickReplies}}" as="q" hint-placeholder-count="4">
+          <button onClick="{{q.send}}" style="flex:none; min-height:48px; padding:0 16px; border-radius:999px; border:2px solid rgba(198,113,57,.26); background:var(--color-neutral-100, #f9f4ed); color:var(--color-accent-800, #643312); font-size:15px; font-weight:600; cursor:pointer; white-space:nowrap; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:rgba(246,160,107,.2)">{{q.label}}</button>
+        </sc-for>
+      </div>
+
+      <div style="flex:none; padding:12px; padding-bottom:max(12px, env(safe-area-inset-bottom)); display:flex; gap:9px; align-items:flex-end">
+        <input value="{{chatInput}}" onChange="{{onChatInput}}" onKeyDown="{{onChatKey}}" placeholder="想講咩都得，唔想打字可以撳上面嘅句子" style="flex:1; min-width:0; min-height:56px; border-radius:var(--radius-md, 16px); border:2px solid rgba(198,113,57,.24); padding:0 16px; font-size:17px; background:#FFFFFF; color:var(--color-text, #201e1d)"></input>
+        <button onClick="{{sendChat}}" aria-label="傳送" style="flex:none; width:56px; height:56px; border-radius:var(--radius-md, 16px); border:none; background:var(--color-accent, #c67139); cursor:pointer; display:grid; place-items:center; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-700, #8c491a)">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-100, #f9f4ed)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2.5-6L4 12z"></path></svg>
         </button>
       </div>
     </div>
   </sc-if>
+
+</sc-if>
 
 </div>
 </div>
@@ -1522,6 +1913,7 @@ const PRESETS = [
 ];
 
 const STORE_KEY = 'eg_hk_toolbox_v1';
+const NOTES_KEY = 'eg_hk_notes_v1';
 const PROFILE_KEY = 'eg_hk_profile_v1';
 const SESSION_KEY = 'eg_hk_sessions_v1';
 
@@ -1531,6 +1923,13 @@ const ZONES = [
   { id: 'yellow', label: '黃區', en: 'Yellow', mood: '緊張 · 煩躁 · 坐唔定', c: '#F6A06B', ink: '#402310' },
   { id: 'red', label: '紅區', en: 'Red', mood: '好嬲 · 好驚 · 頂唔順', c: '#B2622D', ink: '#FFF6EC' }
 ];
+
+const MASCOT_LINES = {
+  happy: ['做得好呀！', '你幫到我喇。', '呢個方法好正！', '我舒服返好多。'],
+  confused: ['我有啲唔明…', '我仲係好唔舒服。', '試下第二個方法好嗎？'],
+  tense: ['有啲嘢嚟緊…', '我開始唔舒服。'],
+  calm: ['而家好舒服。', '我哋一齊慢慢嚟。']
+};
 
 const ZONE_ADVICE = {
   blue: {
@@ -1566,6 +1965,10 @@ const CHANNELS = [
   { id: 'change', label: '突然嘅改變', en: 'Sudden change', desc: '行程改動、計劃被打亂' },
   { id: 'social', label: '同人相處', en: 'Social demands', desc: '被要求傾偈、擁抱、應酬' }
 ];
+
+const TRIGGER_SFX = { carpass: 'lampBuzz', curtain: 'curtain', crowdin: 'crowdIn', notes: 'schoolBell', doorway: 'doorbell', eyelids: 'soft', lampdim: 'lampBuzz', headphones: 'muffle' };
+const CHANNEL_SFX = { light: 'lampBuzz', sound: 'mtrChime', crowd: 'crowdIn', change: 'schoolBell', social: 'doorbell', calm: 'soft' };
+const ACTION_SFX = { gaze: 'soft', move: 'step', breath: 'breathe', dim: 'soft', shield: 'muffle', muffle: 'muffle', count: 'beep', speech: 'soft', confused: 'beep' };
 
 const LEVELS = [
   { v: 0.6, label: '仲頂得順', en: 'Manageable' },
@@ -1832,10 +2235,15 @@ class Component extends DCLogic {
     bgmUrl: '', bgmPlaying: false, bgmVol: 60, presetId: null, musicOn: true, sfxVol: 60, bgmMsg: '', bgmMsgKind: 'info',
     pinInput: '', dashUnlocked: false, pinErr: '',
     breathPhase: '準備', breathCycles: 0, ttsNote: '',
-    breathRunning: true, breathSound: true, breathClock: '0:00', walking: false, walkLabel: '', breather: false, speaking: false,
+    breathRunning: true, breathSound: true, breathClock: '0:00', walking: false, walkLabel: '', breather: false, ttsOn: false, voiceList: [], voiceName: '',
     profile: null, onboarding: false, sessions: [], peak: 0, lastStrategy: '', obStep: 0, obDraft: {}, story: false, storyIdx: 0,
     checkin: null, zoneBefore: null, zoneAfter: null, advice: null, effect: null, effectKey: 0,
-    waveIdx: 0, hasMoreWaves: false, best: {}, reportOpen: false, reportSeen: false,
+    waveIdx: 0, hasMoreWaves: false, best: {}, reportOpen: false,
+    countdown: 10, countdownRun: false, particles: [], quickWin: false, sfxOn: true, chatNudged: false,
+    mascotLine: '', mascotMood: 'calm', autoSpeak: false, intensity: 1, reminders: [], reminderDraft: '',
+    certName: '', certIssued: false, comfortOn: false, voicePicker: false, reportSeen: false,
+    chatSettings: false, sampleOn: false, savedReplyId: null,
+    notes: [], noteDraft: '', noteZone: null, noteShare: true, noteMsg: '', replyDraft: {},
     overloadInvite: false, inviteDismissed: false,
     strategyCounts: { '降噪耳機': 5, '4-7-8 呼吸法': 4, '搵個角落': 2 }
   };
@@ -1851,6 +2259,7 @@ class Component extends DCLogic {
     } catch (e) {
       this.setState({ storageBlocked: true });
     }
+    this.setState({ notes: this.loadNotes() });
     let prof = null, sess = [];
     try {
       const p = window.localStorage.getItem(PROFILE_KEY);
@@ -1859,6 +2268,12 @@ class Component extends DCLogic {
       if (q) sess = JSON.parse(q) || [];
       const bb = window.localStorage.getItem('eg_hk_best_v1');
       if (bb) this.setState({ best: JSON.parse(bb) || {} });
+      const rm = window.localStorage.getItem('eg_hk_reminders_v1');
+      if (rm) this.setState({ reminders: JSON.parse(rm) || [] });
+      const vn = window.localStorage.getItem('eg_hk_voice_v1');
+      if (vn) this.setState({ voiceName: vn });
+      const ct = window.localStorage.getItem('eg_hk_cert_v1');
+      if (ct) { const o = JSON.parse(ct) || {}; if (o.name) this.setState({ certName: o.name }); }
     } catch (e) {}
     this.setState({ toolbox: saved, profile: prof, sessions: sess, onboarding: !prof, sessionStart: Date.now() });
     this.injectKeyframes();
@@ -1868,18 +2283,33 @@ class Component extends DCLogic {
       messages: [{ role: 'ai', text: '你好，我係小窩。呢度冇人會評價你，想講咩都得。\n💡現在可以試試：深深吸一口氣，然後同我講你而家覺得點。' }]
     });
     try {
-      if (window.speechSynthesis) window.speechSynthesis.getVoices();
+      if (window.speechSynthesis) {
+        const load = () => {
+          const all = window.speechSynthesis.getVoices() || [];
+          const zh = all.filter(x => /zh|yue|cantonese/i.test(x.lang + ' ' + x.name));
+          if (zh.length) this.setState({ voiceList: zh.map(x => ({ name: x.name, lang: x.lang })) });
+        };
+        load();
+        window.speechSynthesis.onvoiceschanged = load;
+      }
     } catch (e) {}
   }
 
   componentWillUnmount() {
     clearInterval(this.emoTimer);
+    clearTimeout(this.walkTimer);
+    clearTimeout(this.lineTimer);
+    clearTimeout(this.partTimer);
+    clearTimeout(this.effectTimer);
+    clearTimeout(this.savedTimer);
     clearInterval(this.beaconTimer);
     clearInterval(this.exposureTimer);
     cancelAnimationFrame(this.jellyRaf_a);
     cancelAnimationFrame(this.jellyRaf_b);
     cancelAnimationFrame(this.sandRaf);
     this.stopBreathTone();
+    this.stopAmbience();
+    try { if (this.comfort) { this.comfort.pause(); this.comfort = null; } } catch (e) {}
     try { if (this.actx) this.actx.close(); } catch (e) {}
     this.stopBgm();
   }
@@ -1938,6 +2368,16 @@ class Component extends DCLogic {
 @keyframes eg-tick{0%{opacity:0;transform:translateY(9px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes eg-sink{0%{transform:translateY(-30px);opacity:0}100%{transform:translateY(0);opacity:1}}
 @keyframes eg-shrinkout{0%{transform:scale(1);opacity:.9}100%{transform:scale(.2);opacity:0}}
+@keyframes eg-particle{0%{transform:translate(0,0) scale(.5);opacity:0}20%{opacity:1}100%{transform:translate(var(--px,0),var(--py,-120px)) scale(1.1);opacity:0}}
+@keyframes eg-happy{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-16px) scale(1.06)}60%{transform:translateY(0) scale(1)}80%{transform:translateY(-7px) scale(1.03)}}
+@keyframes eg-countdown{from{width:100%}to{width:0%}}
+@keyframes eg-badge-in{0%{transform:translateY(14px) scale(.86);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+@keyframes eg-cert-in{0%{opacity:0;transform:scale(.96) translateY(14px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes eg-underline{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+@keyframes eg-stagger-in{0%{opacity:0;transform:translateY(12px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes eg-soft-glow{0%,100%{box-shadow:0 0 0 0 rgba(198,113,57,0)}50%{box-shadow:0 0 22px 4px rgba(198,113,57,.34)}}
+@keyframes eg-bubble-in{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes eg-seal-in{0%{opacity:0;transform:rotate(-8deg) scale(.86)}100%{opacity:1;transform:rotate(-6deg) scale(1)}}
 `;
     try {
       let el = document.getElementById('eg-kf');
@@ -1958,6 +2398,8 @@ class Component extends DCLogic {
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.quiet !== this.state.quiet) this.applyMotion();
+    /* one choke point: leaving the chapter screen by ANY route kills the scene bed */
+    if (prevState.screen === 'chapter' && this.state.screen !== 'chapter') this.stopAmbience();
     if (this.chatScroll && (prevState.messages !== this.state.messages || prevState.chatBusy !== this.state.chatBusy)) {
       this.chatScroll.scrollTop = this.chatScroll.scrollHeight;
     }
@@ -1969,6 +2411,10 @@ class Component extends DCLogic {
       const load = Math.max(0, Math.min(100, s.load + n));
       if (load > (s.peak || 0)) s = { ...s, peak: load };
       const overloadInvite = load >= 100 && !s.inviteDismissed ? true : s.overloadInvite;
+      if (load >= 70 && !s.chatNudged && !s.chatOpen) {
+        setTimeout(() => this.nudgeChat(), 400);
+        return { load, peak: Math.max(s.peak || 0, load), overloadInvite, chatNudged: true };
+      }
       return { load, peak: Math.max(s.peak || 0, load), overloadInvite };
     });
   }
@@ -1976,14 +2422,252 @@ class Component extends DCLogic {
   startExposure() {
     clearInterval(this.exposureTimer);
     this.exposureStart = Date.now();
+    this.setState({ countdown: 10, countdownRun: true });
     this.exposureTimer = setInterval(() => {
-      if (Date.now() - this.exposureStart > 5000) this.addLoad(2);
-    }, 1000);
+      const el = (Date.now() - this.exposureStart) / 1000;
+      const left = Math.max(0, Math.ceil(10 - el));
+      if (this.state.countdown !== left) this.setState({ countdown: left });
+      if (el > 5) this.addLoad(2);
+    }, 500);
   }
 
-  stopExposure() { clearInterval(this.exposureTimer); }
+  stopExposure() { clearInterval(this.exposureTimer); this.setState({ countdownRun: false }); }
+
+  mascotSay(mood) {
+    const list = MASCOT_LINES[mood] || [];
+    if (!list.length) return;
+    const line = list[Math.floor(Math.random() * list.length)];
+    this.setState({ mascotLine: line, mascotMood: mood });
+    clearTimeout(this.lineTimer);
+    this.lineTimer = setTimeout(() => this.setState({ mascotLine: '' }), 3200);
+    if (this.state.autoSpeak) this.speak(line, mood === 'happy' ? 'encourage' : 'gentle');
+  }
+
+  celebrate(quick) {
+    const parts = [];
+    for (let i = 0; i < 14; i++) {
+      const a = (Math.PI * 2 * i) / 14 + Math.random() * 0.4;
+      parts.push({ k: i, px: Math.round(Math.cos(a) * (90 + Math.random() * 70)) + 'px',
+        py: Math.round(Math.sin(a) * (90 + Math.random() * 70) - 40) + 'px',
+        l: (42 + Math.random() * 16) + '%', t: (44 + Math.random() * 12) + '%',
+        d: (Math.random() * 0.3).toFixed(2) + 's',
+        c: i % 3 === 0 ? 'var(--color-accent-400, #f6a06b)' : i % 3 === 1 ? 'var(--color-accent-2-400, #aebf92)' : 'var(--color-neutral-100, #f9f4ed)',
+        sz: (9 + Math.round(Math.random() * 9)) + 'px' });
+    }
+    this.setState({ particles: parts, quickWin: !!quick });
+    clearTimeout(this.partTimer);
+    this.partTimer = setTimeout(() => this.setState({ particles: [], quickWin: false }), 2000);
+    this.chime(quick);
+  }
+
+  /* ---------- scene sound ---------- */
+  audioCtx() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!this.actx) this.actx = new AC();
+      if (this.actx.state === 'suspended') { const r = this.actx.resume(); if (r && r.catch) r.catch(() => {}); }
+      return this.actx;
+    } catch (e) { return null; }
+  }
+
+  sfxGain(scale) {
+    const s = this.state;
+    if (!s.sfxOn) return 0;
+    if (s.quiet && s.quietChoice === 'mute') return 0;
+    const q = s.quiet ? 0.45 : 1;
+    return (s.sfxVol / 100) * (scale || 1) * q;
+  }
+
+  /* one-shot scene sounds, all synthesized so nothing extra has to load */
+  sfx(kind) {
+    const ac = this.audioCtx();
+    if (!ac) return;
+    const g0 = this.sfxGain(0.2);
+    if (g0 <= 0) return;
+    const now = ac.currentTime;
+    const tone = (hz, t0, dur, vol, type) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(hz, now + t0);
+      g.gain.setValueAtTime(0, now + t0);
+      g.gain.linearRampToValueAtTime(g0 * vol, now + t0 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + t0 + dur);
+      o.connect(g); g.connect(ac.destination);
+      o.start(now + t0); o.stop(now + t0 + dur + 0.05);
+    };
+    const noise = (t0, dur, vol, lo, hi) => {
+      const buf = this.noiseBuffer(ac, false);
+      if (!buf) return;
+      const src = ac.createBufferSource(); src.buffer = buf;
+      const bp = ac.createBiquadFilter();
+      bp.type = hi ? 'bandpass' : 'lowpass';
+      bp.frequency.value = hi ? (lo + hi) / 2 : lo;
+      if (hi) bp.Q.value = 0.9;
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0, now + t0);
+      g.gain.linearRampToValueAtTime(g0 * vol, now + t0 + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + t0 + dur);
+      src.connect(bp); bp.connect(g); g.connect(ac.destination);
+      src.start(now + t0); src.stop(now + t0 + dur + 0.05);
+    };
+
+    if (kind === 'tick') { tone(760, 0, 0.14, 0.5, 'triangle'); }
+    else if (kind === 'mtrChime') { tone(1046.5, 0, 0.5, 0.6, 'sine'); tone(784, 0.26, 0.7, 0.6, 'sine'); }
+    else if (kind === 'doorBeep') { [0, 0.34, 0.68].forEach(t => tone(1180, t, 0.2, 0.55, 'square')); }
+    else if (kind === 'lampBuzz') { tone(118, 0, 0.42, 0.42, 'sawtooth'); noise(0, 0.3, 0.3, 2400, 5200); }
+    else if (kind === 'schoolBell') { tone(660, 0, 1.5, 0.5, 'triangle'); tone(990, 0, 1.3, 0.26, 'sine'); }
+    else if (kind === 'doorbell') { tone(659.3, 0, 0.7, 0.55, 'sine'); tone(523.3, 0.34, 1.0, 0.55, 'sine'); }
+    else if (kind === 'crowdIn') { noise(0, 1.5, 0.5, 380, 1100); tone(96, 0, 1.1, 0.3, 'sine'); }
+    else if (kind === 'beep') { tone(880, 0, 0.16, 0.45, 'square'); }
+    else if (kind === 'paper') { noise(0, 0.32, 0.4, 2800, 6400); }
+    else if (kind === 'curtain') { noise(0, 0.85, 0.42, 700, 2400); }
+    else if (kind === 'muffle') { tone(300, 0, 0.5, 0.34, 'sine'); noise(0, 0.5, 0.2, 420); }
+    else if (kind === 'step') { noise(0, 0.16, 0.4, 180); noise(0.24, 0.16, 0.34, 180); }
+    else if (kind === 'breathe') { tone(196, 0, 1.1, 0.3, 'sine'); }
+    else if (kind === 'soft') { tone(523.3, 0, 0.5, 0.4, 'sine'); }
+  }
+
+  /* looping ambience bed, one per chapter setting */
+  startAmbience(kind) {
+    this.stopAmbience();
+    const ac = this.audioCtx();
+    if (!ac) return;
+    const vol = this.sfxGain(1);
+    if (vol <= 0) return;
+    let buf = null;
+    try { buf = this.noiseBuffer(ac, true); } catch (e) { return; }
+    if (!buf) return;
+    const spec = {
+      light:  { f: 320,  type: 'lowpass',  g: 0.030, lfo: 0.05, amt: 60 },
+      sound:  { f: 150,  type: 'lowpass',  g: 0.075, lfo: 0.13, amt: 70 },
+      crowd:  { f: 700,  type: 'bandpass', g: 0.048, lfo: 0.2,  amt: 220 },
+      change: { f: 420,  type: 'lowpass',  g: 0.028, lfo: 0.07, amt: 80 },
+      social: { f: 820,  type: 'bandpass', g: 0.044, lfo: 0.24, amt: 260 },
+      calm:   { f: 260,  type: 'lowpass',  g: 0.026, lfo: 0.04, amt: 50 }
+    }[kind] || { f: 300, type: 'lowpass', g: 0.026, lfo: 0.05, amt: 60 };
+    try {
+      const src = ac.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const flt = ac.createBiquadFilter();
+      flt.type = spec.type; flt.frequency.value = spec.f;
+      if (spec.type === 'bandpass') flt.Q.value = 0.7;
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0, ac.currentTime);
+      g.gain.linearRampToValueAtTime(vol * spec.g, ac.currentTime + 1.6);
+      const lfo = ac.createOscillator(); lfo.frequency.value = spec.lfo;
+      const amt = ac.createGain(); amt.gain.value = spec.amt;
+      lfo.connect(amt); amt.connect(flt.frequency); lfo.start();
+      src.connect(flt); flt.connect(g); g.connect(ac.destination); src.start();
+      this.ambNodes = [src, lfo];
+      this.ambGain = g;
+      this.ambKind = kind;
+    } catch (e) {}
+  }
+
+  stopAmbience() {
+    try {
+      if (this.ambGain && this.actx) {
+        const t = this.actx.currentTime;
+        this.ambGain.gain.cancelScheduledValues(t);
+        this.ambGain.gain.setValueAtTime(this.ambGain.gain.value, t);
+        this.ambGain.gain.linearRampToValueAtTime(0, t + 0.6);
+      }
+      const nodes = this.ambNodes || [];
+      setTimeout(() => nodes.forEach(n => { try { n.stop(); } catch (e) {} }), 700);
+    } catch (e) {}
+    this.ambNodes = null; this.ambGain = null; this.ambKind = null;
+  }
+
+  ambienceVolume() {
+    if (!this.ambGain || !this.actx) return;
+    const spec = { light: 0.030, sound: 0.075, crowd: 0.048, change: 0.028, social: 0.044, calm: 0.026 }[this.ambKind] || 0.026;
+    try {
+      const t = this.actx.currentTime;
+      this.ambGain.gain.cancelScheduledValues(t);
+      this.ambGain.gain.linearRampToValueAtTime(this.sfxGain(1) * spec, t + 0.4);
+    } catch (e) {}
+  }
+
+  chime(quick) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC || !this.state.sfxOn) return;
+      if (!this.actx) this.actx = new AC();
+      if (this.actx.state === 'suspended') { const r = this.actx.resume(); if (r && r.catch) r.catch(() => {}); }
+      const muted = this.state.quiet && this.state.quietChoice === 'mute';
+      const vol = muted ? 0 : (this.state.sfxVol / 100) * 0.13;
+      if (vol <= 0) return;
+      const now = this.actx.currentTime;
+      const notes = quick ? [523.3, 659.3, 784, 1046.5] : [523.3, 659.3, 784];
+      notes.forEach((hz, i) => {
+        const o = this.actx.createOscillator(), g = this.actx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(hz, now + i * 0.11);
+        g.gain.setValueAtTime(0, now + i * 0.11);
+        g.gain.linearRampToValueAtTime(vol, now + i * 0.11 + 0.04);
+        g.gain.linearRampToValueAtTime(0, now + i * 0.11 + 0.42);
+        o.connect(g); g.connect(this.actx.destination);
+        o.start(now + i * 0.11); o.stop(now + i * 0.11 + 0.45);
+      });
+    } catch (e) {}
+  }
 
   /* ---------- persistence ---------- */
+  loadNotes() {
+    try {
+      const raw = window.localStorage.getItem(NOTES_KEY);
+      return raw ? (JSON.parse(raw) || []) : [];
+    } catch (e) { return []; }
+  }
+
+  persistNotes(list) {
+    try { window.localStorage.setItem(NOTES_KEY, JSON.stringify(list)); }
+    catch (e) { this.setState({ storageBlocked: true }); }
+  }
+
+  addNote() {
+    const text = (this.state.noteDraft || '').trim();
+    if (!text) { this.setState({ noteMsg: '寫少少嘢先，一兩個字都得。' }); return; }
+    const note = {
+      id: 'n' + Date.now(),
+      text,
+      zone: this.state.noteZone || null,
+      share: !!this.state.noteShare,
+      at: Date.now(),
+      reply: ''
+    };
+    this.setState(s => {
+      const list = [note, ...s.notes];
+      this.persistNotes(list);
+      const blocked = this.state.storageBlocked;
+      return { notes: list, noteDraft: '', noteZone: null,
+        noteMsg: blocked ? '寫落咗，但呢部裝置暫時保存唔到，閂咗就會冇。'
+          : note.share ? '收到。家長打開儀表板就會睇到。' : '收到。呢句只有你自己睇得到。' };
+    });
+    this.chime();
+  }
+
+  deleteNote(id) {
+    this.setState(s => {
+      const list = s.notes.filter(n => n.id !== id);
+      this.persistNotes(list);
+      return { notes: list, noteMsg: '已經刪走。' };
+    });
+  }
+
+  saveReply(id) {
+    this.setState(s => {
+      const note = s.notes.find(n => n.id === id);
+      const draft = s.replyDraft[id];
+      const text = (draft === undefined ? ((note && note.reply) || '') : draft).trim();
+      const list = s.notes.map(n => n.id === id ? { ...n, reply: text, replyAt: Date.now() } : n);
+      this.persistNotes(list);
+      return { notes: list, replyDraft: { ...s.replyDraft, [id]: text }, savedReplyId: id };
+    });
+    clearTimeout(this.savedTimer);
+    this.savedTimer = setTimeout(() => this.setState({ savedReplyId: null }), 2600);
+  }
+
   persist(list) {
     try {
       window.localStorage.setItem(STORE_KEY, JSON.stringify(list));
@@ -2017,8 +2701,8 @@ class Component extends DCLogic {
 
   sensitivity(channel) {
     const p = this.state.profile;
-    if (!p || !p[channel]) return 1;
-    return p[channel];
+    const base = (p && p[channel]) ? p[channel] : 1;
+    return base * (this.state.intensity || 1);
   }
 
   addToToolbox(item) {
@@ -2033,23 +2717,70 @@ class Component extends DCLogic {
   }
 
   /* ---------- speech ---------- */
+  /* Single gate for every voice source. Any new source must be silenced here
+     too, so mutual exclusion can never be half-wired again. */
+  silenceVoices(except) {
+    if (except !== 'tts') {
+      try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+      if (this.state.ttsOn) this.setState({ ttsOn: false });
+    }
+    if (except !== 'comfort') {
+      try { this.stopComfort(); } catch (e) {}
+    }
+  }
+
+  playComfort(src, flag) {
+    const key = flag || 'comfortOn';
+    const url = src || 'audio/calm-voice.mp3';
+    try {
+      if (this.comfort && !this.comfort.paused) {
+        const same = this.comfortKey === key;
+        this.stopComfort();
+        if (same) return;
+      }
+      this.silenceVoices('comfort');
+      if (!this.comfort || this.comfortSrc !== url) {
+        this.comfort = new Audio(url);
+        this.comfortSrc = url;
+        this.comfort.onended = () => this.setState({ comfortOn: false, sampleOn: false });
+        this.comfort.onerror = () => this.setState({ comfortOn: false, sampleOn: false, ttsNote: '搵唔到小音把聲嘅檔案。' });
+      }
+      this.comfortKey = key;
+      const muted = this.state.quiet && this.state.quietChoice === 'mute';
+      this.comfort.volume = muted ? 0 : Math.max(0.15, this.state.sfxVol / 100);
+      this.comfort.currentTime = 0;
+      const p = this.comfort.play();
+      if (p && p.catch) p.catch(() => this.setState({ comfortOn: false, sampleOn: false, ttsNote: '撳多一次就播到。' }));
+      this.setState({ comfortOn: key === 'comfortOn', sampleOn: key === 'sampleOn', ttsOn: false });
+    } catch (e) { this.setState({ comfortOn: false, sampleOn: false }); }
+  }
+
+  stopComfort() {
+    try { if (this.comfort) { this.comfort.pause(); this.comfort.currentTime = 0; } } catch (e) {}
+    this.setState({ comfortOn: false, sampleOn: false });
+  }
+
   speak(text, toneId) {
-    const prof = VOICE[toneId] || { rate: 0.88, pitch: 1 };
+    const prof = VOICE[toneId] || { rate: 0.8, pitch: 0.95 };
+    this.silenceVoices('tts');
     try {
       if (!window.speechSynthesis) { this.setState({ ttsNote: '此裝置不支援語音朗讀。' }); return; }
       const voices = window.speechSynthesis.getVoices() || [];
-      const v = voices.find(x => /zh-HK|yue/i.test(x.lang)) || voices.find(x => /zh/i.test(x.lang));
+      const want = this.state.voiceName;
+      const v = (want && voices.find(x => x.name === want))
+        || voices.find(x => /zh-HK|yue/i.test(x.lang))
+        || voices.find(x => /zh/i.test(x.lang));
       const u = new SpeechSynthesisUtterance(text);
       u.lang = v && /zh-HK|yue/i.test(v.lang) ? 'zh-HK' : 'zh-TW';
       if (v) u.voice = v;
       u.rate = prof.rate;
       u.pitch = prof.pitch;
       u.volume = this.state.quiet && this.state.quietChoice === 'mute' ? 0 : this.state.sfxVol / 100;
-      u.onend = () => this.setState({ speaking: false });
-      u.onerror = () => this.setState({ speaking: false });
+      u.onend = () => this.setState({ ttsOn: false });
+      u.onerror = () => this.setState({ ttsOn: false });
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
-      this.setState({ speaking: true });
+      this.setState({ ttsOn: true });
       this.setState({ ttsNote: v && /zh-HK|yue/i.test(v.lang) ? '' : '此裝置未安裝廣東話語音，暫用中文語音朗讀。' });
     } catch (e) {
       this.setState({ ttsNote: '語音朗讀暫時用唔到，唔影響你玩。' });
@@ -2061,7 +2792,12 @@ class Component extends DCLogic {
     const ch = CHAPTERS.find(c => c.id === id);
     this.setState({ walking: true, walkLabel: '行緊去 ' + (ch ? ch.place.split(' · ')[0] : '') + '…' });
     clearTimeout(this.walkTimer);
-    this.walkTimer = setTimeout(() => this.setState({ walking: false }), 1600);
+    this.walkTimer = setTimeout(() => {
+      this.walkTimer = null;
+      this.setState({ walking: false });
+      if (ch && this.state.screen === 'chapter' && this.state.chapterId === id) this.startAmbience(ch.channel);
+    }, 1600);
+    this.sfx('step');
     this.setState({ screen: 'chapter', chapterId: id, phase: 'hint', load: 0, peak: 0, feedback: null, inviteDismissed: false, story: true, storyIdx: 0, waveIdx: 0, hasMoreWaves: false, zoneBefore: null, zoneAfter: null });
   }
 
@@ -2080,16 +2816,21 @@ class Component extends DCLogic {
   startBeacon = () => {
     const w = this.curWave();
     this.setState({ phase: 'beacon', beaconCount: 3 });
+    this.sfx('tick');
     clearInterval(this.beaconTimer);
     this.beaconTimer = setInterval(() => {
       this.setState(s => {
         if (s.beaconCount <= 1) {
           clearInterval(this.beaconTimer);
-          const chn = (CHAPTERS.find(c => c.id === this.state.chapterId) || {}).channel;
-          this.addLoad(Math.round((w.trigger.intensity || 0) * this.sensitivity(chn)));
+          const ch = CHAPTERS.find(c => c.id === this.state.chapterId) || {};
+          this.addLoad(Math.round((w.trigger.intensity || 0) * this.sensitivity(ch.channel)));
           this.startExposure();
+          const cue = TRIGGER_SFX[w.fx] || CHANNEL_SFX[ch.channel] || 'beep';
+          this.sfx(cue);
+          if (ch.channel === 'sound') setTimeout(() => this.sfx('doorBeep'), 900);
           return { beaconCount: 0, phase: 'trigger' };
         }
+        this.sfx('tick');
         return { beaconCount: s.beaconCount - 1 };
       });
     }, 1000);
@@ -2113,6 +2854,7 @@ class Component extends DCLogic {
 
   playEffect(name) {
     clearTimeout(this.effectTimer);
+    clearTimeout(this.savedTimer);
     this.setState({ effect: name, effectKey: (this.state.effectKey || 0) + 1 });
     this.effectTimer = setTimeout(() => this.setState({ effect: null }), 2200);
   }
@@ -2120,13 +2862,21 @@ class Component extends DCLogic {
   chooseCard(card) {
     this.stopExposure();
     this.playEffect(FX[card.id] ? card.id : (card.fx || card.effect));
+    const cue = ACTION_SFX[card.effect] || ACTION_SFX[card.fx];
+    if (cue) this.sfx(cue);
     const ch = CHAPTERS.find(c => c.id === this.state.chapterId);
     if (!card.ok) {
       this.setState({ feedback: { ok: false, text: card.fb } });
+      this.mascotSay('confused');
       this.startExposure();
       return;
     }
     this.addLoad(-card.relief);
+    const secs = (Date.now() - (this.exposureStart || Date.now())) / 1000;
+    const quick = secs <= 10;
+    if (quick) this.addLoad(-8);
+    this.celebrate(quick);
+    this.mascotSay('happy');
     const total = this.wavesOf(CHAPTERS.find(c => c.id === this.state.chapterId)).length;
     this.setState({ phase: 'resolved', hasMoreWaves: this.state.waveIdx + 1 < total, feedback: { ok: true, text: card.fb, unlock: card.unlock } });
     this.setState({ lastStrategy: card.unlock ? card.unlock.name : '' });
@@ -2151,6 +2901,8 @@ class Component extends DCLogic {
   leaveChapter = () => {
     this.stopExposure();
     clearInterval(this.beaconTimer);
+    clearTimeout(this.walkTimer);
+    this.stopAmbience();
     this.setState({ screen: 'home', chapterId: null, phase: 'idle', feedback: null, load: 0, breather: false });
   };
 
@@ -2160,6 +2912,29 @@ class Component extends DCLogic {
     if (PRACTICAL_WORDS.some(w => text.includes(w))) return 'practical';
     if (GENTLE_WORDS.some(w => text.includes(w))) return 'gentle';
     return 'playful';
+  }
+
+  nudgeChat() {
+    const msg = { role: 'ai', text: '我見到你而家有啲辛苦。唔使急，我哋一齊搞掂佢。\n💡現在可以試試：撳下面其中一個掣，或者同我講你而家點。',
+      acts: [{ k: 'quiet', label: '開安靜模式' }, { k: 'calm', label: '入冷靜空間' }, { k: 'breathe', label: '做一分鐘呼吸' }] };
+    this.setState(s => ({ chatOpen: true, messages: [...s.messages, msg] }));
+  }
+
+  runAct(k) {
+    if (k === 'quiet') { this.setState({ quiet: true }); setTimeout(() => this.applyVolume(), 0); }
+    else if (k === 'calm') { this.setState({ chatOpen: false, screen: 'sanctuary' }); this.stopExposure(); }
+    else if (k === 'breathe') { this.setState({ chatOpen: false, breather: true }); this.stopExposure(); }
+    else if (k === 'music') { this.setState({ musicOn: true }); this.playPreset('drone'); }
+  }
+
+  parseActs(text) {
+    const t = text || '';
+    const acts = [];
+    if (/安靜模式|Quiet/i.test(t)) acts.push({ k: 'quiet', label: '開安靜模式' });
+    if (/冷靜空間|沙畫/.test(t)) acts.push({ k: 'calm', label: '入冷靜空間' });
+    if (/呼吸|水母|4-7-8/.test(t)) acts.push({ k: 'breathe', label: '做一分鐘呼吸' });
+    if (/音樂|耳機|聽歌/.test(t)) acts.push({ k: 'music', label: '播我的音樂' });
+    return acts.slice(0, 3);
   }
 
   sendChat = async () => {
@@ -2185,9 +2960,9 @@ class Component extends DCLogic {
         messages: [...history, { role: 'user', content: text }]
       });
       const out = (reply || '').trim() || FALLBACK[toneId];
-      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: out, tone: toneId }], chatBusy: false }));
+      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: out, tone: toneId, acts: this.parseActs(out) }], chatBusy: false }));
     } catch (e) {
-      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: FALLBACK[toneId], tone: toneId }], chatBusy: false }));
+      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: FALLBACK[toneId], tone: toneId, acts: this.parseActs(FALLBACK[toneId]) }], chatBusy: false }));
     }
   };
 
@@ -2678,10 +3453,11 @@ class Component extends DCLogic {
 
     const wv = this.wavesOf(ch);
     const cw = wv[s.waveIdx] || wv[0];
-    const cards = (cw && s.phase === 'trigger' ? cw.cards : []).map(c => ({
+    const cards = (cw && s.phase === 'trigger' ? cw.cards : []).map((c, i) => ({
       ...c,
       isLamp: c.icon === 'lamp', isWindow: c.icon === 'window', isHeadphones: c.icon === 'headphones',
       isDoor: c.icon === 'door', isBreath: c.icon === 'breath', isLoud: c.icon === 'loud', isHand: c.icon === 'hand',
+      delay: (i * 0.09).toFixed(2) + 's',
       choose: () => this.chooseCard(c),
       speak: () => this.speak(c.say || c.label)
     }));
@@ -2690,6 +3466,7 @@ class Component extends DCLogic {
       { id: 'home', label: '主頁', isHome: true },
       { id: 'toolbox', label: '安全工具箱', isBox: true },
       { id: 'sanctuary', label: '冷靜空間', isCalm: true },
+      { id: 'certificate', label: '我的證書', isCert: true },
       { id: 'dashboard', label: '家長儀表板', isDash: true }
     ];
     const navItems = navDef.map(n => ({
@@ -2702,12 +3479,19 @@ class Component extends DCLogic {
     const messages = s.messages.map((m, i) => ({
       ...m,
       align: m.role === 'user' ? 'flex-end' : 'flex-start',
+      row: m.role === 'user' ? 'row-reverse' : 'row',
+      isAi: m.role === 'ai',
+      radius: m.role === 'user'
+        ? 'var(--radius-md, 16px) var(--radius-md, 16px) 6px var(--radius-md, 16px)'
+        : 'var(--radius-md, 16px) var(--radius-md, 16px) var(--radius-md, 16px) 6px',
       bg: m.role === 'user' ? 'var(--color-accent, #c67139)' : ((VOICE[m.tone] || VOICE.gentle).bg),
       fg: m.role === 'user' ? 'var(--color-neutral-100, #f9f4ed)' : 'var(--color-text, #201e1d)',
       toneLabel: m.role === 'ai' && m.tone ? (VOICE[m.tone] || VOICE.gentle).label : '',
       toneChip: m.role === 'ai' && m.tone ? (VOICE[m.tone] || VOICE.gentle).chip : 'var(--color-neutral-600, #82796a)',
       hasTone: m.role === 'ai' && !!m.tone,
       canSave: m.role === 'ai' && i > 0,
+      acts: (m.acts || []).map(a => ({ ...a, run: () => this.runAct(a.k) })),
+      hasActs: !!(m.acts && m.acts.length),
       save: () => { this.addToToolbox({ kind: 'AI 建議', name: '小窩嘅提醒 ' + (i + 1), desc: m.text }); this.setState({ copyMsg: '' }); },
       speak: () => this.speak(m.text.replace(/💡/g, ''), m.tone)
     }));
@@ -2721,12 +3505,13 @@ class Component extends DCLogic {
       loadPct: Math.round(s.load) + '%',
       loadLabel: Math.round(s.load) + '%',
       loadColor: this.loadColor(s.load),
+      loadPulse: s.load >= 75 ? 'eg-soft-glow 2.4s ease-in-out infinite' : 'none',
       emoLabel: emo.label, emoColor: emo.color,
 
       quietLabel: s.quiet ? '安靜模式：開' : '安靜模式',
       quietBg: s.quiet ? 'var(--color-accent, #c67139)' : 'transparent',
       quietFg: s.quiet ? 'var(--color-neutral-100, #f9f4ed)' : 'var(--color-accent, #c67139)',
-      toggleQuiet: () => this.setState(st => { const q = !st.quiet; setTimeout(() => this.applyVolume(), 0); return { quiet: q }; }),
+      toggleQuiet: () => this.setState(st => { setTimeout(() => this.ambienceVolume(), 0); const q = !st.quiet; setTimeout(() => this.applyVolume(), 0); return { quiet: q }; }),
       modeLabel: s.mode === 'safe' ? '返去練習模式' : '入安全模式',
       toggleMode: () => this.setState(st => ({ mode: st.mode === 'safe' ? 'practice' : 'safe', screen: 'home', chapterId: null, phase: 'idle', load: 0 })),
 
@@ -2734,7 +3519,61 @@ class Component extends DCLogic {
       isHomeSafe: s.screen === 'home' && s.mode === 'safe',
       isChapter: isChapter,
       isSanctuary: s.screen === 'sanctuary',
+      notePhrases: ['我今日好累', '我頂唔順', '我做到啦', '我想同你講一件事']
+        .map(p => ({ label: p, use: () => this.setState(st => ({ noteDraft: st.noteDraft ? st.noteDraft + '\n' + p : p })) })),
+      noteDraft: s.noteDraft,
+      onNoteDraft: (e) => this.setState({ noteDraft: e.target.value }),
+      noteZones: ZONES.map(z => ({
+        label: z.label,
+        bg: s.noteZone === z.id ? z.c : 'transparent',
+        fg: s.noteZone === z.id ? z.ink : 'var(--color-neutral-800, #474238)',
+        border: s.noteZone === z.id ? z.c : 'rgba(198,113,57,.24)',
+        pick: () => this.setState({ noteZone: s.noteZone === z.id ? null : z.id })
+      })),
+      shareBg: s.noteShare ? 'var(--color-accent-2-300, #ccdbb2)' : 'transparent',
+      shareFg: s.noteShare ? 'var(--color-accent-2-900, #232a19)' : 'var(--color-neutral-700, #645c50)',
+      shareBorder: s.noteShare ? 'var(--color-accent-2-600, #728157)' : 'rgba(198,113,57,.24)',
+      privBg: s.noteShare ? 'transparent' : 'var(--color-accent-2-300, #ccdbb2)',
+      privFg: s.noteShare ? 'var(--color-neutral-700, #645c50)' : 'var(--color-accent-2-900, #232a19)',
+      privBorder: s.noteShare ? 'rgba(198,113,57,.24)' : 'var(--color-accent-2-600, #728157)',
+      setNoteShare: () => this.setState({ noteShare: true }),
+      setNotePrivate: () => this.setState({ noteShare: false }),
+      addNote: () => this.addNote(),
+      noteMsg: s.noteMsg,
+      hasNotes: s.notes.length > 0,
+      myNotes: s.notes.map(n => {
+        const z = ZONES.find(x => x.id === n.zone);
+        return {
+          text: n.text,
+          tag: n.share ? '已分享畀家長' : '只留畀自己',
+          tagBg: n.share ? 'var(--color-accent-2-300, #ccdbb2)' : 'var(--color-neutral-300, #dcd3c4)',
+          tagFg: n.share ? 'var(--color-accent-2-900, #232a19)' : 'var(--color-neutral-800, #474238)',
+          hasZone: !!z, zoneLabel: z ? z.label : '', zoneC: z ? z.c : 'transparent', zoneInk: z ? z.ink : 'inherit',
+          when: new Date(n.at).toLocaleDateString('zh-HK', { month: 'numeric', day: 'numeric' }) + ' ' + new Date(n.at).toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' }),
+          hasReply: !!(n.reply && n.reply.trim()), reply: n.reply || '',
+          speak: () => this.speak(n.text, 'gentle'),
+          del: () => this.deleteNote(n.id)
+        };
+      }),
+      sharedNotes: s.notes.filter(n => n.share).map(n => {
+        const z = ZONES.find(x => x.id === n.zone);
+        const draft = s.replyDraft[n.id];
+        return {
+          text: n.text,
+          hasZone: !!z, zoneLabel: z ? z.label : '', zoneC: z ? z.c : 'transparent', zoneInk: z ? z.ink : 'inherit',
+          when: new Date(n.at).toLocaleDateString('zh-HK', { month: 'numeric', day: 'numeric' }) + ' ' + new Date(n.at).toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' }),
+          replyVal: draft === undefined ? (n.reply || '') : draft,
+          onReply: (e) => this.setState(st => ({ replyDraft: { ...st.replyDraft, [n.id]: e.target.value } })),
+          save: () => this.saveReply(n.id),
+          replyState: s.savedReplyId === n.id ? '已儲存 · 孩子下次打開信箱就會看到'
+            : (draft !== undefined && draft.trim() !== (n.reply || '').trim()) ? '有未儲存的修改'
+            : n.reply && n.reply.trim() ? '已回覆' : ''
+        };
+      }),
+      noSharedNotes: s.notes.filter(n => n.share).length === 0,
+
       isToolbox: s.screen === 'toolbox',
+      isCertificate: s.screen === 'certificate',
       isDashboard: s.screen === 'dashboard',
 
       totalCards: (() => { let n = 0; CHAPTERS.forEach(c => this.wavesOf(c).forEach(w => w.cards.forEach(k => { if (k.unlock) n++; }))); return n; })(),
@@ -2760,8 +3599,32 @@ class Component extends DCLogic {
       showStart: isChapter && s.phase === 'hint',
       showBeacon: isChapter && s.phase === 'beacon',
       beaconText: cw ? cw.beacon : '', beaconCount: s.beaconCount,
+      beaconPct: Math.round((s.beaconCount / 3) * 100) + '%',
       waveLabel: wv.length > 1 ? '第 ' + (s.waveIdx + 1) + ' 浪 / 共 ' + wv.length + ' 浪' : '',
       hasWaveLabel: wv.length > 1,
+      countdownRun: s.countdownRun && s.phase === 'trigger' && !fb,
+      countdownLeft: s.countdown,
+      countdownColor: s.countdown > 5 ? 'var(--color-accent-2-400, #aebf92)' : s.countdown > 2 ? 'var(--color-accent-400, #f6a06b)' : '#b2622d',
+      particles: s.particles,
+      showQuickWin: s.quickWin,
+      mascotLine: s.mascotLine, hasMascotLine: !!s.mascotLine,
+      mascotAnim: s.mascotMood === 'happy' && s.mascotLine ? 'eg-happy 1.1s ease both' : 'eg-drift calc(var(--eg-speed,1) * 5s) ease-in-out infinite',
+      intensityOpts: [
+        { v: 0.6, label: '低' }, { v: 1, label: '中' }, { v: 1.4, label: '高' }
+      ].map(o => ({ ...o,
+        bg: s.intensity === o.v ? 'var(--color-accent, #c67139)' : 'transparent',
+        fg: s.intensity === o.v ? 'var(--color-neutral-100, #f9f4ed)' : 'var(--color-accent-700, #8c491a)',
+        pick: () => this.setState({ intensity: o.v }) })),
+      sfxOn: s.sfxOn,
+      sfxLabel: s.sfxOn ? '音效：開' : '音效：關',
+      sfxBg: s.sfxOn ? 'var(--color-accent-2-300, #ccdbb2)' : 'transparent',
+      toggleSfx: () => this.setState({ sfxOn: !this.state.sfxOn }, () => {
+        if (!this.state.sfxOn) this.stopAmbience();
+        else { const c = CHAPTERS.find(x => x.id === this.state.chapterId); if (c && this.state.screen === 'chapter') this.startAmbience(c.channel); }
+      }),
+      zoneBeforeChip: (() => { const z = ZONES.find(x => x.id === s.zoneBefore); return z ? { label: z.label, c: z.c, ink: z.ink } : null; })(),
+      zoneAfterChip: (() => { const z = ZONES.find(x => x.id === s.zoneAfter); return z ? { label: z.label, c: z.c, ink: z.ink } : null; })(),
+      showZoneCompare: !!(s.zoneBefore && s.zoneAfter),
       effectKey: s.effectKey || 0,
       hasFxScene: !!FX[s.effect],
       fxSceneBg: FX[s.effect] ? FX[s.effect].bg : 'transparent',
@@ -2867,7 +3730,7 @@ class Component extends DCLogic {
         else if (a.action.kind === 'music') { this.setState({ musicOn: true }); this.playPreset('drone'); }
       },
       adviceSkip: () => this.setState({ advice: null, checkin: null }),
-      adviceSpeak: () => { const a = ZONE_ADVICE[s.advice]; if (a) this.speak(a.title + '。' + a.body); },
+      adviceSpeak: () => { const a = ZONE_ADVICE[s.advice]; if (a) this.speak(a.title + '。' + a.body, 'gentle'); },
       checkinSkip: () => { if (s.checkin === 'after') this.finishChapter(); else this.setState({ checkin: null }); },
       zoneShift: (() => {
         const b = ZONES.find(z => z.id === s.zoneBefore), a = ZONES.find(z => z.id === s.zoneAfter);
@@ -2889,11 +3752,31 @@ class Component extends DCLogic {
       },
       storyNextLabel: ch && ch.story && s.storyIdx + 1 >= ch.story.length ? '我明白喇，開始' : '跟住呢…',
       storySkip: () => this.setState({ story: false, checkin: 'before' }),
-      storySpeak: () => { const p = ch && ch.story ? ch.story[s.storyIdx] : null; if (p) this.speak(p.t + '。' + p.d); },
+      storySpeak: () => { const p = ch && ch.story ? ch.story[s.storyIdx] : null; if (p) this.speak(p.t + '。' + p.d, 'gentle'); },
       storyTitle: ch ? ch.title : '',
 
-      speaking: s.speaking,
-      stopSpeaking: () => { try { window.speechSynthesis.cancel(); } catch (e) {} this.setState({ speaking: false }); },
+      speaking: !!(s.ttsOn || s.comfortOn || s.sampleOn),
+      stopSpeaking: () => {
+        try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+        try { this.stopComfort(); } catch (e) {}
+        this.setState({ ttsOn: false });
+      },
+      voiceOptions: [{ name: '', lang: '自動揀' }, ...s.voiceList].map(v => ({
+        label: v.name ? (/HK|yue/i.test(v.lang) ? '粵 · ' : '中 · ') + v.name.replace(/^Microsoft |^Google /, '').slice(0, 18) : '自動揀',
+        bg: s.voiceName === v.name ? 'var(--color-accent, #c67139)' : 'transparent',
+        fg: s.voiceName === v.name ? 'var(--color-neutral-100, #f9f4ed)' : 'var(--color-accent-700, #8c491a)',
+        pick: () => {
+          try { window.localStorage.setItem('eg_hk_voice_v1', v.name); } catch (e) {}
+          this.setState({ voiceName: v.name }, () => this.speak('你好，我係小音。我會用呢把聲同你講嘢。', this.state.tone === 'auto' ? 'gentle' : this.state.tone));
+        }
+      })),
+      hasVoiceOptions: s.voiceList.length > 0,
+      noVoiceOptions: s.voiceList.length === 0,
+      showVoicePicker: s.voicePicker,
+      toggleVoicePicker: () => this.setState({ voicePicker: !this.state.voicePicker }),
+      comfortOn: s.comfortOn,
+      comfortLabel: s.comfortOn ? '停止' : '播放安慰錄音',
+      playComfort: () => this.playComfort(),
       showBreather: s.breather,
       openBreather: () => { this.stopExposure(); this.setState({ breather: true }); },
       closeBreather: () => { this.setState({ breather: false }); if (this.state.phase === 'trigger') this.startExposure(); },
@@ -2901,6 +3784,7 @@ class Component extends DCLogic {
       sceneQuietFg: s.quiet ? '#201e1d' : 'var(--color-bg, #f5ead8)',
 
       toolboxItems: s.toolbox.map((t, i) => ({
+        delay: Math.min(i * 0.07, 0.7).toFixed(2) + 's',
         ...t,
         tagBg: t.kind === '策略卡' ? 'rgba(174,191,146,.5)' : 'rgba(246,160,107,.24)',
         tagFg: t.kind === '策略卡' ? 'var(--color-accent-700, #8c491a)' : 'var(--color-accent-800, #643312)',
@@ -2910,6 +3794,62 @@ class Component extends DCLogic {
       toolboxEmpty: s.toolbox.length === 0,
       storageBlocked: s.storageBlocked,
       copyMsg: s.copyMsg,
+      reminders: (s.reminders || []).map((r, i) => ({ ...r, n: i + 1,
+        remove: () => { const list = s.reminders.filter((_, j) => j !== i); try { window.localStorage.setItem('eg_hk_reminders_v1', JSON.stringify(list)); } catch (e) {} this.setState({ reminders: list }); } })),
+      hasReminders: !!(s.reminders && s.reminders.length),
+      reminderDraft: s.reminderDraft || '',
+      onReminderDraft: (e) => this.setState({ reminderDraft: e.target.value }),
+      addReminder: () => {
+        const t = (this.state.reminderDraft || '').trim();
+        if (!t) return;
+        const list = [...(this.state.reminders || []), { text: t }];
+        try { window.localStorage.setItem('eg_hk_reminders_v1', JSON.stringify(list)); } catch (e) { this.setState({ storageBlocked: true }); }
+        this.setState({ reminders: list, reminderDraft: '' });
+      },
+      reminderPresets: ['搭港鐵前打開工具箱', '返學前睇一次我嘅頭三招', '去人多嘅地方前戴好耳機'].map(t => ({ text: t,
+        add: () => {
+          const list = [...(this.state.reminders || []), { text: t }];
+          try { window.localStorage.setItem('eg_hk_reminders_v1', JSON.stringify(list)); } catch (e) {}
+          this.setState({ reminders: list });
+        } })),
+      certName: s.certName || '',
+      onCertName: (e) => this.setState({ certName: e.target.value }),
+      certIssued: s.certIssued,
+      certPending: !s.certIssued,
+      certDisplayName: (s.certName || '').trim() || '小小守護者',
+      certDate: new Date().toLocaleDateString('zh-HK', { year: 'numeric', month: 'long', day: 'numeric' }),
+      certChapters: new Set((s.sessions || []).map(x => x.chapter)).size,
+      certCards: s.toolbox.filter(t => t.kind === '策略卡').length,
+      certPills: (() => {
+        const n = new Set((s.sessions || []).map(x => x.chapter)).size;
+        const cards = s.toolbox.filter(t => t.kind === '策略卡').length;
+        const zones = (s.sessions || []).filter(x => x.zoneBefore && x.zoneAfter).length;
+        const all = [
+          { t: '覺察身體訊號', e: 'Noticing my body', on: n >= 1 },
+          { t: '使用平靜策略', e: 'Using calm-down strategies', on: cards >= 1 },
+          { t: '照顧自己的情緒', e: 'Caring for my feelings', on: zones >= 1 },
+          { t: '勇敢練習', e: 'Practising bravely', on: n >= 2 }
+        ];
+        return all.filter(p => p.on).map((p, i) => ({ ...p, d: (i * 0.12).toFixed(2) + 's' }));
+      })(),
+      certBody: (() => {
+        const n = new Set((s.sessions || []).map(x => x.chapter)).size;
+        const cards = s.toolbox.filter(t => t.kind === '策略卡').length;
+        if (n >= 6) return '你喺六個香港日常場景入面，一次又一次留意到自己身體嘅訊號，揀咗屬於自己嘅方法，然後照顧好自己嘅情緒。呢啲唔係人哋教你嘅，係你自己試返嚟嘅。小音好為你驕傲。';
+        if (n >= 1) return '你完成咗 ' + n + ' 個香港日常場景，解鎖咗 ' + cards + ' 張屬於你嘅策略卡。你留意到自己身體嘅訊號，亦揀咗自己嘅方法去照顧自己。呢啲唔係人哋教你嘅，係你自己試返嚟嘅。小音好為你驕傲。';
+        return '你嚟到呢度，願意試一試——呢個本身已經係一件唔容易嘅事。小音會喺度等你，慢慢嚟就得。';
+      })(),
+      certHasPills: (() => {
+        const n = new Set((s.sessions || []).map(x => x.chapter)).size;
+        return n >= 1 || s.toolbox.filter(t => t.kind === '策略卡').length >= 1;
+      })(),
+      issueCert: () => {
+        const n = (this.state.certName || '').trim();
+        try { window.localStorage.setItem('eg_hk_cert_v1', JSON.stringify({ name: n })); } catch (e) {}
+        this.setState({ certIssued: true });
+      },
+      resetCert: () => this.setState({ certIssued: false }),
+      printCert: () => { try { window.print(); } catch (e) {} },
       copyToolbox: () => {
         const txt = s.toolbox.map(t => '【' + t.kind + '】' + t.name + '：' + t.desc + (t.when ? '（幾時用：' + t.when + '）' : '')).join('\n') || '（工具箱仲係空嘅）';
         try { navigator.clipboard.writeText(txt); this.setState({ copyMsg: '已複製，可以貼畀家長或者老師。' }); }
@@ -2986,7 +3926,7 @@ class Component extends DCLogic {
       bgmMsgColor: s.bgmMsgKind === 'warn' ? 'var(--color-accent-700, #8c491a)' : s.bgmMsgKind === 'ok' ? 'var(--color-accent-2-700, #56633f)' : 'var(--color-neutral-600, #82796a)',
       bgmVol: s.bgmVol, sfxVol: s.sfxVol,
       onBgmVol: (e) => { const v = +e.target.value; this.setState({ bgmVol: v }); this.applyVolume(undefined, v); },
-      onSfxVol: (e) => this.setState({ sfxVol: +e.target.value }),
+      onSfxVol: (e) => this.setState({ sfxVol: +e.target.value }, () => this.ambienceVolume()),
       musicOnlyBg: s.quietChoice === 'music' ? 'var(--color-accent-2-300, #ccdbb2)' : 'transparent',
       musicOnlyFg: s.quietChoice === 'music' ? 'var(--color-text, #201e1d)' : 'var(--color-accent, #c67139)',
       muteAllBg: s.quietChoice === 'mute' ? 'var(--color-accent-2-300, #ccdbb2)' : 'transparent',
@@ -2997,6 +3937,17 @@ class Component extends DCLogic {
       navItems,
 
       chatOpen: s.chatOpen, chatClosed: !s.chatOpen,
+      showChatSettings: s.chatSettings,
+      toggleChatSettings: () => this.setState({ chatSettings: !this.state.chatSettings }),
+      gearBg: s.chatSettings ? 'rgba(198,113,57,.2)' : 'var(--color-neutral-200, #eee7db)',
+      toneSubline: s.tone === 'auto'
+        ? '語氣：自動跟你講嘅嘢調整'
+        : '語氣：' + ((TONES.find(t => t.id === s.tone) || {}).label || ''),
+      sampleLabel: s.sampleOn ? '停止播放' : '聽小音把聲（八句核心語句）',
+      playSample: () => this.playComfort('audio/voice/top8.mp3', 'sampleOn'),
+      quickReplies: [
+        '我而家好唔舒服', '呢度太嘈', '我唔知點做', '我做到啦'
+      ].map(q => ({ label: q, send: () => this.setState({ chatInput: q }, () => this.sendChat()) })),
       openChat: () => this.setState({ chatOpen: true }),
       closeChat: () => this.setState({ chatOpen: false }),
       tones: TONES.map(t => ({

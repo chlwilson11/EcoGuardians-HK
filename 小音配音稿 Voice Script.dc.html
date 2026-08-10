@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/organic-b4a519d4-dc33-4b33-bc54-3f71c7498114/styles.css">
+<script src="_ds/organic-b4a519d4-dc33-4b33-bc54-3f71c7498114/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./doc-page.js"></script>
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  a { color: var(--color-accent-700, #8c491a); }
+  a:hover { color: var(--color-accent, #c67139); }
+</style>
+</helmet>
+
+<doc-page margin="0.7in">
+
+  <div style="font-family:var(--font-body, Figtree, system-ui, sans-serif); color:var(--color-text, #201e1d); line-height:1.6">
+
+    <div style="font-size:11.5pt; font-weight:700; letter-spacing:.14em; color:var(--color-neutral-600, #82796a); margin-bottom:6pt">星港守護者 ECOGUARDIANS HK</div>
+    <h1 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:26pt; line-height:1.15; margin:0 0 6pt">小音配音稿</h1>
+    <div style="font-size:13pt; color:var(--color-neutral-700, #645c50); margin-bottom:18pt">72 句 · 錄好之後放入 <code style="font-family:ui-monospace,monospace; font-size:11.5pt; background:var(--color-neutral-200, #eee7db); padding:1pt 5pt; border-radius:4pt">audio/voice/</code></div>
+
+    <div style="border:1.4pt solid var(--color-accent, #c67139); border-radius:10pt; padding:12pt 14pt; background:#fdf6ec; margin-bottom:20pt; break-inside:avoid">
+      <div style="font-size:12.5pt; font-weight:700; color:var(--color-accent-700, #8c491a); margin-bottom:5pt">錄音須知</div>
+      <ul style="margin:0; padding-left:15pt; font-size:11.5pt; line-height:1.65; color:var(--color-neutral-800, #474238)">
+        <li>語速要慢，句與句之間留半秒。急促嘅語氣會令感官敏感嘅小朋友更緊張。</li>
+        <li>句尾唔好上揚。用陳述而唔係疑問嘅語調，除非個句本身有問號。</li>
+        <li>音量平均，唔好有突然大聲嘅位。錄完統一做一次音量正規化。</li>
+        <li>每個檔案頭尾各留 0.3 秒靜音，避免播放時「切頭」。</li>
+        <li>檔名要完全一致（全部細楷、用連字號），我會按檔名接入遊戲。</li>
+      </ul>
+    </div>
+
+    <h2 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:16pt; margin:0 0 4pt; break-after:avoid">1 · 系統固定語句</h2>
+    <p style="font-size:11pt; color:var(--color-neutral-600, #82796a); margin:0 0 8pt">最高優先。呢 8 句出現次數最多，淨係錄呢組已經有明顯效果。</p>
+    <table style="width:100%; border-collapse:collapse; font-size:11pt; margin-bottom:20pt">
+      <thead>
+        <tr style="text-align:left; color:var(--color-neutral-600, #82796a)">
+          <th style="padding:0 0 5pt; font-size:9.5pt; letter-spacing:.08em; width:31%; border-bottom:1.2pt solid var(--color-neutral-300, #dcd3c4)">檔名</th>
+          <th style="padding:0 0 5pt; font-size:9.5pt; letter-spacing:.08em; border-bottom:1.2pt solid var(--color-neutral-300, #dcd3c4)">內容</th>
+        </tr>
+      </thead>
+      <tbody>
+        <sc-for list="{{sysRows}}" as="r" hint-placeholder-count="8">
+          <tr>
+            <td style="padding:6pt 8pt 6pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); font-family:ui-monospace,monospace; font-size:10pt; color:var(--color-accent-700, #8c491a); vertical-align:top">{{r.id}}</td>
+            <td style="padding:6pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); vertical-align:top">{{r.t}}<span style="color:var(--color-neutral-600, #82796a); font-size:10pt">{{r.noteText}}</span></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+
+    <h2 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:16pt; margin:0 0 4pt; break-after:avoid">2 · 小音情緒回應</h2>
+    <p style="font-size:11pt; color:var(--color-neutral-600, #82796a); margin:0 0 8pt">同一情緒有幾句，遊戲會隨機抽，唔會每次一樣。括號係情緒，錄嗰陣請用返嗰種語氣。</p>
+    <table style="width:100%; border-collapse:collapse; font-size:11pt; margin-bottom:20pt">
+      <thead>
+        <tr style="text-align:left; color:var(--color-neutral-600, #82796a)">
+          <th style="padding:0 0 5pt; font-size:9.5pt; letter-spacing:.08em; width:31%; border-bottom:1.2pt solid var(--color-neutral-300, #dcd3c4)">檔名</th>
+          <th style="padding:0 0 5pt; font-size:9.5pt; letter-spacing:.08em; border-bottom:1.2pt solid var(--color-neutral-300, #dcd3c4)">內容</th>
+        </tr>
+      </thead>
+      <tbody>
+        <sc-for list="{{mascotRows}}" as="r" hint-placeholder-count="11">
+          <tr>
+            <td style="padding:6pt 8pt 6pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); font-family:ui-monospace,monospace; font-size:10pt; color:var(--color-accent-700, #8c491a); vertical-align:top">{{r.id}}</td>
+            <td style="padding:6pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); vertical-align:top">{{r.t}}<span style="color:var(--color-neutral-600, #82796a); font-size:10pt">{{r.noteText}}</span></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+
+    <h2 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:16pt; margin:0 0 4pt; break-after:avoid">3 · AI 四種語氣（離線備援）</h2>
+    <p style="font-size:11pt; color:var(--color-neutral-600, #82796a); margin:0 0 8pt">呢四句係網絡斷線時嘅備用回覆，比較長，可以分段錄。</p>
+    <table style="width:100%; border-collapse:collapse; font-size:11pt; margin-bottom:20pt">
+      <tbody>
+        <sc-for list="{{aiRows}}" as="r" hint-placeholder-count="4">
+          <tr>
+            <td style="padding:8pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); vertical-align:top">
+              <div style="font-family:ui-monospace,monospace; font-size:10pt; color:var(--color-accent-700, #8c491a); margin-bottom:3pt">{{r.id}}<span style="font-family:var(--font-body, Figtree, system-ui, sans-serif); color:var(--color-neutral-600, #82796a)">{{r.noteText}}</span></div>
+              <div>{{r.t}}</div>
+            </td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+
+    <h2 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:16pt; margin:0 0 4pt; break-after:avoid">4 · 四色區建議</h2>
+    <table style="width:100%; border-collapse:collapse; font-size:11pt; margin-bottom:20pt">
+      <tbody>
+        <sc-for list="{{zoneRows}}" as="r" hint-placeholder-count="4">
+          <tr>
+            <td style="padding:8pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); vertical-align:top">
+              <div style="font-family:ui-monospace,monospace; font-size:10pt; color:var(--color-accent-700, #8c491a); margin-bottom:3pt">{{r.id}}</div>
+              <div>{{r.t}}</div>
+            </td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+
+    <h2 style="font-family:var(--font-heading, Caprasimo, serif); font-weight:400; font-size:16pt; margin:0 0 4pt; break-after:avoid">5 · AAC 策略卡（45 句）</h2>
+    <p style="font-size:11pt; color:var(--color-neutral-600, #82796a); margin:0 0 8pt">呢啲係小朋友撳喇叭掣時聽到嘅句子，全部用第一人稱，代小朋友講出佢想做嘅嘢。語氣要平和，唔使誇張。</p>
+    <sc-for list="{{cardGroups}}" as="g" hint-placeholder-count="6">
+      <div style="break-inside:avoid; margin-bottom:14pt">
+        <div style="font-size:12pt; font-weight:700; color:var(--color-accent-2-800, #3d472b); padding:5pt 10pt; background:var(--color-accent-2-200, #e1eecc); border-radius:6pt; margin-bottom:6pt">{{g.title}}</div>
+        <table style="width:100%; border-collapse:collapse; font-size:11pt">
+          <tbody>
+            <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="6">
+              <tr>
+                <td style="padding:5pt 8pt 5pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); font-family:ui-monospace,monospace; font-size:10pt; color:var(--color-accent-700, #8c491a); vertical-align:top; width:31%">{{r.id}}</td>
+                <td style="padding:5pt 0; border-bottom:.5pt solid var(--color-neutral-200, #eee7db); vertical-align:top">{{r.t}}<span style="color:var(--color-neutral-600, #82796a); font-size:10pt">{{r.noteText}}</span></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-for>
+
+    <div style="border-radius:10pt; padding:12pt 14pt; background:var(--color-neutral-200, #eee7db); margin-top:16pt; break-inside:avoid">
+      <div style="font-size:12.5pt; font-weight:700; margin-bottom:5pt">錄好之後點做</div>
+      <p style="margin:0; font-size:11.5pt; line-height:1.65; color:var(--color-neutral-800, #474238)">將全部 mp3 放入 <code style="font-family:ui-monospace,monospace; font-size:11pt">audio/voice/</code>，檔名同上表一致，然後同我講一聲。遊戲會改成「有錄音就播錄音、冇錄音先用系統語音」，所以你可以分批錄——錄幾多就用幾多，唔會因為未錄齊而失效。建議次序：第 1 組 → 第 2 組 → 第 5 組 → 其餘。</p>
+    </div>
+
+  </div>
+
+</doc-page>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SYS = [
+  ['sys-welcome', '你好，我係小音。呢度冇人會評價你，想講咩都得。', '進入遊戲第一句'],
+  ['sys-voicetest', '你好，我係小音。我會用呢把聲同你講嘢。', '試聲用'],
+  ['sys-nudge', '我見到你而家有啲辛苦。唔使急，我哋一齊搞掂佢。', '負荷達 70% 時主動彈出'],
+  ['sys-overload', '要不要一起去安靜的地方？唔想都完全冇問題，我哋可以留喺度。', '負荷 100% 邀請'],
+  ['sys-safety', '多謝你肯同我講呢啲，我知道講出嚟需要好大勇氣。呢件事好重要，小窩想你搵到真正幫到你嘅人。現在可以試試：即刻搵一個你信任嘅大人講返呢句說話。', '偵測到自傷字眼'],
+  ['sys-breathe-in', '吸氣', '呼吸器，語調平穩上揚一點點'],
+  ['sys-breathe-out', '呼氣', '呼吸器，語調緩緩下沉'],
+  ['sys-cert', '呢張證書係你自己嚟返嘅。小音好為你驕傲。', '證書發出時']
+];
+
+const MASCOT = [
+  ['mascot-happy-1', '做得好呀！', '開心'],
+  ['mascot-happy-2', '你幫到我喇。', '開心'],
+  ['mascot-happy-3', '呢個方法好正！', '開心'],
+  ['mascot-happy-4', '我舒服返好多。', '開心'],
+  ['mascot-confused-1', '我有啲唔明…', '困惑，唔可以有責備感'],
+  ['mascot-confused-2', '我仲係好唔舒服。', '困惑'],
+  ['mascot-confused-3', '試下第二個方法好嗎？', '困惑，語氣要柔和邀請'],
+  ['mascot-tense-1', '有啲嘢嚟緊…', '緊張但唔驚慌'],
+  ['mascot-tense-2', '我開始唔舒服。', '緊張'],
+  ['mascot-calm-1', '而家好舒服。', '平靜'],
+  ['mascot-calm-2', '我哋一齊慢慢嚟。', '平靜']
+];
+
+const AI = [
+  ['ai-gentle', '我聽到你了。呢種感覺真係好唔舒服，唔係你嘅錯，只係你嘅感官比人敏銳咗少少。我哋而家好安全，小音陪住你。現在可以試試：撳一下上面嘅「安靜模式」，或者戴上耳機聽你最鍾意嘅音樂。', '溫柔陪伴'],
+  ['ai-practical', '收到。感官負荷過高時，大腦會發出警報，呢個係正常反應。我哋可以用「降溫三步驟」：隔離刺激源、轉移注意力、調節呼吸。現在可以試試：撳底欄「冷靜空間」，跟住藍色水母做三次「吸氣四秒、呼氣八秒」。', '實用指導'],
+  ['ai-encourage', '你好叻。能夠喺第一時間講出自己嘅感覺，代表你好了解自己嘅身體訊號，呢個係好勇敢嘅一步。現在可以試試：打開「安全工具箱」，睇返你之前解鎖嘅策略卡，揀一張用。', '積極鼓勵'],
+  ['ai-playful', '哇，外面嘅噪音怪獸係咪又開緊派對呀？真係好討厭。不過冇所謂，我哋有隱形防護罩。現在可以試試：飲一啖暖水，然後向後行三步，整返個「無人打擾特區」。', '輕鬆幽默']
+];
+
+const ZONE = [
+  ['zone-blue', '好累或者好悶嘅時候，唔使勉強自己即刻專心。做少少身體動作，個腦會慢慢跟上。'],
+  ['zone-green', '你而家平靜又準備好。喺綠區學到嘅方法，最容易記得住。'],
+  ['zone-yellow', '緊張同坐唔定係身體嘅預警。呢個時候入場，負荷會升得快啲，先做少少準備會好過啲。'],
+  ['zone-red', '好嬲或者頂唔順嘅時候，練習新嘢係好難嘅。先照顧自己，關卡幾時都喺度等你。']
+];
+
+const CARDS = [
+  [1, '第 1 章 · 初識訊號', [
+    ['card-dim', '我想調暗啲燈', '調暗盞燈'],
+    ['card-window', '我想望下窗外', '望向窗外休息一下'],
+    ['card-cover', '我想用手擋住道光', '用手擋住個光源'],
+    ['card-hit', '我想大力拍盞燈', '用力拍打盞燈'],
+    ['card-w1a', '我想拉埋窗簾', '拉窗簾'],
+    ['card-w1b', '我想轉個位坐', '轉個位坐，背向窗'],
+    ['card-w1c', '我閉埋眼數五下', '閉眼數五下']
+  ]],
+  [2, '第 2 章 · 聲音的波浪', [
+    ['card-phones', '我戴返耳機先', '遞耳機畀小音'],
+    ['card-door', '我想行去門口位企下', '提示小音行去門口位'],
+    ['card-breath', '我哋一齊深呼吸', '一齊做 4-7-8 呼吸'],
+    ['card-tell', '我想同大人講我唔舒服', '話畀身邊嘅大人知'],
+    ['card-shout', '我想大聲叫', '大聲叫返轉頭'],
+    ['card-w2a', '我想將個袋揸實', '將背囊揸實喺胸前'],
+    ['card-w2b', '我望住窗外', '望住車窗外'],
+    ['card-w2c', '我想調大啲音樂', '調大少少音樂'],
+    ['card-w2d', '我數三下先行', '心裡數三下先行'],
+    ['card-w2e', '唔該借借', '講「唔該借借」開路'],
+    ['card-w2f', '我等佢哋落先', '等大部分人落先']
+  ]],
+  [3, '第 3 章 · 人群的距離', [
+    ['card-step', '我想向前行半步', '向前行半步'],
+    ['card-bag', '我想將個袋揹返前面', '將背囊揹返前面'],
+    ['card-count', '我數住仲有幾多個人', '數住前面仲有幾個人'],
+    ['card-push', '我想推開佢', '用力推開後面嘅人'],
+    ['card-w3a', '唔好意思，可以再講一次嗎', '要求對方再講一次'],
+    ['card-w3b', '我一次答一個', '一次答一個問題'],
+    ['card-w3c', '我指住個袋就得', '指住個袋代替講嘢']
+  ]],
+  [4, '第 4 章 · 突然的改變', [
+    ['card-ask', '老師，美術堂幾時會補返？', '問老師幾時補返'],
+    ['card-write', '我想寫低新嘅時間表', '喺紙上寫低新次序'],
+    ['card-breath2', '我做三次深呼吸先', '做三次深呼吸'],
+    ['card-refuse', '我唔制', '大聲話「我唔制」'],
+    ['card-w4a', '我摀住耳仔等一等', '摀住耳仔等聲過'],
+    ['card-w4b', '我按自己節奏收拾', '照自己節奏慢慢收'],
+    ['card-w4c', '我去洗手間避一避', '去洗手間避十秒']
+  ]],
+  [5, '第 5 章 · 家中的訪客', [
+    ['card-wave', '姨姨你好，我揮手就得喇', '揮手代替擁抱'],
+    ['card-say', '我今日唔想畀人抱', '直接講出唔想'],
+    ['card-room', '媽媽，我想返房抖一抖', '開口要求休息'],
+    ['card-hide', '唔好掂我', '大叫住推開姨姨'],
+    ['card-w5a', '我想去廚房坐一陣', '搬去隔籬房間'],
+    ['card-w5b', '我戴單邊耳機', '戴單邊耳機'],
+    ['card-w5c', '我去幫手洗杯', '搵件重複嘅事做']
+  ]],
+  [6, '第 6 章 · 我的安全巢', [
+    ['card-review', '我想睇返我嘅工具箱', '同小音一齊睇返工具箱'],
+    ['card-pick3', '我要揀三個方法帶出去', '揀三個最想帶出去嘅方法'],
+    ['card-tellwho', '我想諗下可以搵邊個', '諗一諗可以搵邊個幫手'],
+    ['card-w6a', '我記得，而且我做得到', '自我肯定'],
+    ['card-w6b', '我講返三個方法', '講返三個方法畀小音聽'],
+    ['card-w6c', '唔記得都冇問題，我翻返工具箱', '唔記得都唔緊要']
+  ]]
+];
+
+class Component extends DCLogic {
+  row(id, t, note) {
+    return { id: id + '.mp3', t, noteText: note ? '　（' + note + '）' : '' };
+  }
+  renderVals() {
+    return {
+      sysRows: SYS.map(r => this.row(r[0], r[1], r[2])),
+      mascotRows: MASCOT.map(r => this.row(r[0], r[1], r[2])),
+      aiRows: AI.map(r => this.row(r[0], r[1], r[2])),
+      zoneRows: ZONE.map(r => this.row(r[0], r[1], '')),
+      cardGroups: CARDS.map(g => ({
+        title: g[1],
+        rows: g[2].map(r => this.row(r[0], r[1], r[2]))
+      }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>
