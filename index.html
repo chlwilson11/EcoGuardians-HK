@@ -8,6 +8,7 @@
 <body>
 <x-dc>
 <helmet>
+<link rel="icon" href="assets/ecoguardian-icon.png">
 <link rel="stylesheet" href="_ds/organic-b4a519d4-dc33-4b33-bc54-3f71c7498114/styles.css">
 <script src="_ds/organic-b4a519d4-dc33-4b33-bc54-3f71c7498114/_ds_bundle.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,9 +144,7 @@
     <div style="max-width:1120px; margin:0 auto; padding:12px 20px; display:flex; flex-wrap:wrap; gap:14px; align-items:center">
 
       <div style="display:flex; align-items:center; gap:10px; margin-right:4px">
-        <div style="width:34px; height:34px; border-radius:999px; background:var(--color-accent-2-300, #ccdbb2); display:grid; place-items:center; flex:none">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700, #8c491a)" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-10a7 7 0 0 1 14 0c0 5.5-7 10-7 10z"></path><circle cx="12" cy="11" r="2.4"></circle></svg>
-        </div>
+        <img src="assets/ecoguardian-icon.png" alt="星港守護者" width="38" height="38" style="width:38px; height:38px; border-radius:999px; object-fit:cover; flex:none; display:block"></img>
         <div style="font-family: var(--font-heading, Caprasimo, serif); font-size:19px; letter-spacing:.01em; white-space:nowrap">星港守護者</div>
       </div>
 
@@ -1521,12 +1520,21 @@
             <div style="font-size:14px; color:var(--color-neutral-700, #645c50); line-height:1.55; margin-bottom:18px">呢部裝置未搵到中文語音。iOS 可以喺「設定 → 輔助使用 → 朗讀內容 → 語音」加入廣東話。</div>
           </sc-if>
 
-          <div style="font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--color-neutral-600, #82796a); margin-bottom:9px">小音真人錄音（英文女聲）</div>
+          <div style="font-size:13px; font-weight:700; letter-spacing:.1em; color:var(--color-neutral-600, #82796a); margin-bottom:9px">小音真人錄音</div>
+          <div style="display:flex; gap:8px; margin-bottom:10px">
+            <sc-for list="{{yueOptions}}" as="v" hint-placeholder-count="2">
+              <button onClick="{{v.pick}}" style="flex:1; min-height:52px; border-radius:var(--radius-md, 16px); border:2px solid var(--color-accent-2-600, #728157); cursor:pointer; font-size:16px; font-weight:700; transition: all .4s cubic-bezier(.25,.1,.25,1); background:{{v.bg}}; color:{{v.fg}}">{{v.label}}</button>
+            </sc-for>
+          </div>
+          <button onClick="{{playCanto}}" style="width:100%; min-height:56px; border-radius:var(--radius-md, 16px); border:none; background:var(--color-accent-2-600, #728157); color:var(--color-neutral-100, #f9f4ed); font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-2-700, #56633f)">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 8.5a5 5 0 0 1 0 7"></path><path d="M20 5.5a9 9 0 0 1 0 13"></path></svg>
+            {{cantoLabel}}
+          </button>
           <button onClick="{{playSample}}" style="width:100%; min-height:56px; border-radius:var(--radius-md, 16px); border:none; background:var(--color-accent-2-500, #8fa073); color:var(--color-neutral-100, #f9f4ed); font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition: background .4s cubic-bezier(.25,.1,.25,1)" style-hover="background:var(--color-accent-2-700, #56633f)">
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"></path><path d="M17 8.5a5 5 0 0 1 0 7"></path><path d="M20 5.5a9 9 0 0 1 0 13"></path></svg>
             {{sampleLabel}}
           </button>
-          <div style="font-size:13px; color:var(--color-neutral-600, #82796a); margin-top:8px; line-height:1.55">真人錄嘅英文安慰說話，撳一次播一句，每次唔同。廣東話錄音喺冷靜空間嘅「聽一句安慰說話」。AI 即場生成嘅回覆會用上面揀嘅語音朗讀。</div>
+          <div style="font-size:13px; color:var(--color-neutral-600, #82796a); margin-top:8px; line-height:1.55">廣東話揀男聲或女聲，八句核心語句一次過播；揀完之後，冷靜空間嘅安慰說話都會用同一把聲。英文係逐句安慰說話，撳一次播一句。AI 即場生成嘅回覆會用上面揀嘅語音朗讀。</div>
         </div>
       </sc-if>
 
@@ -1907,9 +1915,15 @@ const VOICE = {
 
 /* Ten single-sentence female comfort recordings (English). Peaks measured 0.267-0.540,
    so each carries a gain factor that lands them all at a matched loudness. */
-/* Cantonese track: peak rms 0.7294 measured on the same 20ms-window pass,
-   so it needs attenuation to sit level with the English pool. */
-const COMFORT_YUE = { f: 'top8.mp3', g: 0.63 };
+/* Two Cantonese readings of the same eight core lines. Peaks measured on the same
+   20ms-window pass (female .729, male .179), so each carries its own level match. */
+/* start: measured speech onset — the male render carries 9.4s of leading silence,
+   which made the button look broken. greet: the opening 「你好，我係小音」 only,
+   used as the picker preview so choosing a voice is a 2-second answer, not 60. */
+const COMFORT_YUE = {
+  female: { f: 'yue-female.mp3', g: 0.63, label: '女聲', start: 0.00, greetEnd: 2.40 },
+  male:   { f: 'yue-male.mp3',   g: 2.57, label: '男聲', start: 9.30, greetEnd: 11.05 }
+};
 
 const COMFORT = [
   { f: 'comfort-en-01.mp3', g: 1.28 }, { f: 'comfort-en-02.mp3', g: 1.70 },
@@ -2293,7 +2307,7 @@ class Component extends DCLogic {
     countdown: 10, countdownRun: false, particles: [], quickWin: false, sfxOn: true, chatNudged: false,
     mascotLine: '', mascotMood: 'calm', autoSpeak: false, intensity: 1, reminders: [], reminderDraft: '',
     certName: '', certIssued: false, comfortOn: false, voicePicker: false, reportSeen: false,
-    chatSettings: false, sampleOn: false, savedReplyId: null,
+    chatSettings: false, sampleOn: false, cantoOn: false, greetOn: false, savedReplyId: null, yueVoice: 'female',
     notes: [], noteDraft: '', noteZone: null, noteShare: true, noteMsg: '', replyDraft: {},
     overloadInvite: false, inviteDismissed: false,
     strategyCounts: { '降噪耳機': 5, '4-7-8 呼吸法': 4, '搵個角落': 2 }
@@ -2372,6 +2386,8 @@ class Component extends DCLogic {
     clearTimeout(this.partTimer);
     clearTimeout(this.effectTimer);
     clearTimeout(this.savedTimer);
+    clearTimeout(this.comfortWindow);
+    clearTimeout(this.comfortArm);
     try { window.removeEventListener('beforeprint', this.fitCertForPrint); } catch (e) {}
     clearInterval(this.beaconTimer);
     clearInterval(this.exposureTimer);
@@ -2808,59 +2824,142 @@ class Component extends DCLogic {
     return COMFORT[this.comfortIdx];
   }
 
-  playComfort(src, flag, gain) {
+  playComfort(src, flag, gain, from, to) {
     const key = flag || 'comfortOn';
     const url = src || 'audio/calm-voice.mp3';
     this.comfortGain = gain == null ? 1 : gain;
     try {
       if (this.comfort && !this.comfort.paused) {
-        const same = this.comfortKey === key;
+        const same = this.comfortKey === key && this.comfortSrc === url;
         this.stopComfort();
         if (same) return;
       }
       this.silenceVoices('comfort');
 
-      /* One element for the whole pool: createMediaElementSource may only be
-         called once per element, and reusing it keeps the graph stable. */
+      /* One element for every clip: createMediaElementSource may only be called
+         once per element, and reusing it keeps the graph stable. */
       if (!this.comfort) {
         this.comfort = new Audio();
         this.comfort.preload = 'auto';
-        this.comfort.onended = () => this.setState({ comfortOn: false, sampleOn: false });
-        this.comfort.onerror = () => this.setState({ comfortOn: false, sampleOn: false, ttsNote: '搵唔到小音把聲嘅檔案。' });
+        this.comfort.onended = () => this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false });
+        this.comfort.onerror = () => this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false, ttsNote: '搵唔到小音把聲嘅檔案。' });
       }
       if (this.comfortSrc !== url) { this.comfort.src = url; this.comfortSrc = url; }
       this.comfortKey = key;
 
-      /* Gain lives on a GainNode, which accepts values above 1, so the
-         per-clip level compensation still applies at full sfxVol. */
+      /* Every press supersedes the last: stale metadata/stop callbacks compare
+         this token and bail, so a fast voice switch can't seek or stop the new clip. */
+      const token = (this.comfortToken || 0) + 1;
+      this.comfortToken = token;
+
+      const muted = this.state.quiet && this.state.quietChoice === 'mute';
+      const base = Math.max(0.15, this.state.sfxVol / 100);
       const ac = this.audioCtx();
-      if (ac && !this.comfortNode) {
+
+      /* Routing through a MediaElementSource takes the element OFF the default
+         output: if the context is suspended the element plays in total silence.
+         So only build the graph once the context is actually running, and keep
+         plain element playback (with its 1.0 ceiling) until then. */
+      if (ac && ac.state === 'running' && !this.comfortNode) {
         try {
           this.comfortNode = ac.createMediaElementSource(this.comfort);
           this.comfortAmp = ac.createGain();
+          /* Boosted clips (the male reading runs 2.57x) can exceed 1.0 on true
+             peaks; a soft limiter keeps that from clipping into a harsh transient. */
+          const comp = ac.createDynamicsCompressor();
+          comp.threshold.value = -8;
+          comp.knee.value = 12;
+          comp.ratio.value = 12;
+          comp.attack.value = 0.004;
+          comp.release.value = 0.18;
           this.comfortNode.connect(this.comfortAmp);
-          this.comfortAmp.connect(ac.destination);
-        } catch (e) { this.comfortAmp = null; }
+          this.comfortAmp.connect(comp);
+          comp.connect(ac.destination);
+        } catch (e) { this.comfortNode = null; this.comfortAmp = null; }
       }
-      const muted = this.state.quiet && this.state.quietChoice === 'mute';
-      const base = Math.max(0.15, this.state.sfxVol / 100);
+
       if (this.comfortAmp) {
         this.comfort.volume = 1;
         this.comfortAmp.gain.value = muted ? 0 : base * this.comfortGain;
       } else {
-        /* No Web Audio: fall back to the element, accepting the 1.0 ceiling. */
         this.comfort.volume = muted ? 0 : Math.max(0, Math.min(1, base * this.comfortGain));
       }
 
-      this.comfort.currentTime = 0;
+      /* play() MUST be called synchronously inside the tap handler: deferring it to
+         loadedmetadata leaves the user-gesture window and the browser blocks it with
+         NotAllowedError. Seeking afterwards is allowed without a fresh gesture, so the
+         start offset is applied once metadata arrives (or immediately if it already has). */
+      /* play() MUST be called synchronously inside the tap handler: deferring it to
+         a media event leaves the user-gesture window and the browser blocks it. */
+      const seekTo = from || 0;
+
+      /* These files are served without Content-Length, so duration reads Infinity and a
+         seek has to buffer through the stream before landing. The preview window must
+         therefore start when playback actually REACHES seekTo, not when play() resolves —
+         otherwise seek latency is subtracted from a 1.75s window and can consume it whole. */
+      const startWindow = () => {
+        if (this.comfortToken !== token || !this.comfort) return;
+        clearTimeout(this.comfortWindow);
+        if (!to || to <= seekTo) return;
+        this.comfortWindow = setTimeout(() => {
+          if (this.comfortToken === token) this.stopComfort();
+        }, Math.max(120, (to - seekTo) * 1000));
+      };
+
+      const armWindow = () => {
+        if (this.comfortToken !== token || !this.comfort) return;
+        if (!to || to <= seekTo) return;
+        if (seekTo <= 0) { startWindow(); return; }
+        let armed = false;
+        const go = () => {
+          if (armed || this.comfortToken !== token) return;
+          armed = true;
+          try { this.comfort.removeEventListener('seeked', go); } catch (e) {}
+          clearTimeout(this.comfortArm);
+          startWindow();
+        };
+        this.comfort.addEventListener('seeked', go, { once: true });
+        /* Fallback: if 'seeked' never arrives, arm once playback passes the offset. */
+        clearTimeout(this.comfortArm);
+        this.comfortArm = setTimeout(go, 6000);
+      };
+
+      const applySeek = () => {
+        if (this.comfortToken !== token || !this.comfort) return;
+        armWindow();
+        if (seekTo > 0) { try { this.comfort.currentTime = seekTo; } catch (e) {} }
+      };
+
+      const failPlay = () => {
+        if (this.comfortToken !== token) return;
+        clearTimeout(this.comfortWindow);
+        clearTimeout(this.comfortArm);
+        this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false, ttsNote: '撳多一次就播到。' });
+      };
+
       const p = this.comfort.play();
-      if (p && p.catch) p.catch(() => this.setState({ comfortOn: false, sampleOn: false, ttsNote: '撳多一次就播到。' }));
-      this.setState({ comfortOn: key === 'comfortOn', sampleOn: key === 'sampleOn', ttsOn: false });
-    } catch (e) { this.setState({ comfortOn: false, sampleOn: false }); }
+      if (p && p.then) {
+        /* catch is bound to play() alone, so a throw inside applySeek can never be
+           misreported as a blocked-playback failure. */
+        p.then(() => { try { applySeek(); } catch (e) {} }, failPlay);
+      } else {
+        try { applySeek(); } catch (e) {}
+      }
+
+      this.setState({ comfortOn: key === 'comfortOn', sampleOn: key === 'sampleOn', cantoOn: key === 'cantoOn', greetOn: key === 'greetOn', ttsOn: false });
+    } catch (e) { this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false }); }
   }
   stopComfort() {
-    try { if (this.comfort) { this.comfort.pause(); this.comfort.currentTime = 0; } } catch (e) {}
-    this.setState({ comfortOn: false, sampleOn: false });
+    clearTimeout(this.comfortWindow);
+    clearTimeout(this.comfortArm);
+    this.comfortToken = (this.comfortToken || 0) + 1;
+    try {
+      if (this.comfort) {
+        this.comfort.pause();
+        this.comfort.currentTime = 0;
+      }
+    } catch (e) {}
+    this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false });
   }
 
   speak(text, toneId) {
@@ -3045,37 +3144,58 @@ class Component extends DCLogic {
     const userMsg = { role: 'user', text };
     this.setState(s => ({ messages: [...s.messages, userMsg], chatInput: '', chatBusy: true }));
 
-    if (SAFETY_WORDS.some(w => text.includes(w))) {
-      setTimeout(() => this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: SAFETY_REPLY, tone: 'safety' }], chatBusy: false })), 400);
-      return;
-    }
-
-    const toneId = this.state.tone === 'auto' ? this.detectTone(text) : this.state.tone;
-    const tone = TONES.find(t => t.id === toneId);
-    const history = this.state.messages.filter(m => !m.isError).slice(-8)
-      .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
-    const system = this.buildSystemPrompt(toneId, tone);
-    const payload = { system: system, max_tokens: 420, messages: [...history, { role: 'user', content: text }] };
-
-    let out = '', failed = false;
+    /* Everything after the lock is taken sits inside try/finally: chatBusy gates send,
+       Enter and every quick-reply chip, so a throw anywhere here would silently disable
+       the whole composer with no error and no recovery short of a reload. */
+    let toneId = this.state.tone === 'auto' ? 'gentle' : this.state.tone;
     try {
-      out = String((await window.claude.complete(payload)) || '').trim();
-    } catch (e1) {
-      try {
-        const flat = system + '\n\n[對話紀錄]\n'
-          + history.map(m => (m.role === 'user' ? '小朋友：' : '小音：') + m.content).join('\n')
-          + '\n小朋友：' + text + '\n小音：';
-        out = String((await window.claude.complete(flat)) || '').trim();
-      } catch (e2) { failed = true; }
-    }
-    if (!out) failed = true;
+      if (SAFETY_WORDS.some(w => text.includes(w))) {
+        await new Promise(r => setTimeout(r, 400));
+        this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: SAFETY_REPLY, tone: 'safety' }] }));
+        return;
+      }
 
-    if (failed) {
-      const msg = this.offlineReply(toneId);
-      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: msg, tone: toneId, isError: true, acts: this.parseActs(msg) }], chatBusy: false }));
-      return;
+      toneId = this.state.tone === 'auto' ? this.detectTone(text) : this.state.tone;
+      const tone = TONES.find(t => t.id === toneId);
+      const history = this.state.messages.filter(m => !m.isError).slice(-8)
+        .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
+      const system = this.buildSystemPrompt(toneId, tone);
+      const payload = { system: system, max_tokens: 420, messages: [...history, { role: 'user', content: text }] };
+
+      /* A hung request would never settle, so every attempt races a timeout. */
+      const withTimeout = (pr, ms) => Promise.race([
+        pr,
+        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))
+      ]);
+
+      let out = '';
+      try {
+        out = String((await withTimeout(window.claude.complete(payload), 22000)) || '').trim();
+      } catch (e1) {
+        try {
+          const flat = system + '\n\n[對話紀錄]\n'
+            + history.map(m => (m.role === 'user' ? '小朋友：' : '小音：') + m.content).join('\n')
+            + '\n小朋友：' + text + '\n小音：';
+          out = String((await withTimeout(window.claude.complete(flat), 18000)) || '').trim();
+        } catch (e2) { out = ''; }
+      }
+
+      if (!out) {
+        const msg = this.offlineReply(toneId);
+        this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: msg, tone: toneId, isError: true, acts: this.parseActs(msg) }] }));
+        return;
+      }
+      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: out, tone: toneId, acts: this.parseActs(out) }] }));
+    } catch (e) {
+      /* Never leave the child staring at a dead composer. */
+      let msg = '我一時間諗唔到點答，唔好意思。\n💡現在可以試試：慢慢吸一口氣，再同我講多次。';
+      try { msg = this.offlineReply(toneId); } catch (e2) {}
+      let acts = [];
+      try { acts = this.parseActs(msg); } catch (e3) {}
+      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: msg, tone: toneId, isError: true, acts: acts }] }));
+    } finally {
+      this.setState({ chatBusy: false });
     }
-    this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: out, tone: toneId, acts: this.parseActs(out) }], chatBusy: false }));
   };
 
   /* Rebuilt every turn: mode, load and quiet state genuinely change the reply. */
@@ -3932,7 +4052,7 @@ class Component extends DCLogic {
       storySpeak: () => { const p = ch && ch.story ? ch.story[s.storyIdx] : null; if (p) this.speak(p.t + '。' + p.d, 'gentle'); },
       storyTitle: ch ? ch.title : '',
 
-      speaking: !!(s.ttsOn || s.comfortOn || s.sampleOn),
+      speaking: !!(s.ttsOn || s.comfortOn || s.sampleOn || s.cantoOn || s.greetOn),
       stopSpeaking: () => {
         try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
         try { this.stopComfort(); } catch (e) {}
@@ -3967,7 +4087,7 @@ class Component extends DCLogic {
       toggleVoicePicker: () => this.setState({ voicePicker: !this.state.voicePicker }),
       comfortOn: s.comfortOn,
       comfortLabel: s.comfortOn ? '停止' : '聽一句安慰說話',
-      playComfort: () => this.playComfort('audio/voice/' + COMFORT_YUE.f, 'comfortOn', COMFORT_YUE.g),
+      playComfort: () => { const c = COMFORT_YUE[s.yueVoice] || COMFORT_YUE.female; this.playComfort('audio/voice/' + c.f, 'comfortOn', c.g, c.start); },
       showBreather: s.breather,
       openBreather: () => { this.stopExposure(); this.setState({ breather: true }); },
       closeBreather: () => { this.setState({ breather: false }); if (this.state.phase === 'trigger') this.startExposure(); },
@@ -4134,7 +4254,18 @@ class Component extends DCLogic {
       toneSubline: s.tone === 'auto'
         ? '語氣：自動跟你講嘅嘢調整'
         : '語氣：' + ((TONES.find(t => t.id === s.tone) || {}).label || ''),
-      sampleLabel: s.sampleOn ? '停止播放' : '聽小音講一句（英文）',
+      yueOptions: ['female', 'male'].map(k => ({
+        label: COMFORT_YUE[k].label,
+        bg: s.yueVoice === k ? 'var(--color-accent-2-600, #728157)' : 'transparent',
+        fg: s.yueVoice === k ? 'var(--color-neutral-100, #f9f4ed)' : 'var(--color-accent-2-800, #3d472b)',
+        pick: () => this.setState({ yueVoice: k }, () => {
+          const c = COMFORT_YUE[k];
+          this.playComfort('audio/voice/' + c.f, 'greetOn', c.g, c.start, c.greetEnd);
+        })
+      })),
+      cantoLabel: s.cantoOn ? '停止播放' : '廣東話 · 八句核心語句',
+      playCanto: () => { const c = COMFORT_YUE[s.yueVoice] || COMFORT_YUE.female; this.playComfort('audio/voice/' + c.f, 'cantoOn', c.g, c.start); },
+      sampleLabel: s.sampleOn ? '停止播放' : '英文 · 逐句安慰說話',
       playSample: () => { const c = this.nextComfort(); this.playComfort('audio/voice/' + c.f, 'sampleOn', c.g); },
       quickReplies: [
         '我而家好唔舒服', '呢度太嘈', '我唔知點做', '我做到啦'
