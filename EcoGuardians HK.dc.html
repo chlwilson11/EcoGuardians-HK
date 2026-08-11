@@ -2386,12 +2386,17 @@ class Component extends DCLogic {
     clearTimeout(this.partTimer);
     clearTimeout(this.effectTimer);
     clearTimeout(this.savedTimer);
+    clearTimeout(this.comfortWindow);
+    clearTimeout(this.comfortArm);
+    clearTimeout(this.nudgeTimer);
+    clearInterval(this.revealTimer);
     try { window.removeEventListener('beforeprint', this.fitCertForPrint); } catch (e) {}
     clearInterval(this.beaconTimer);
     clearInterval(this.exposureTimer);
     cancelAnimationFrame(this.jellyRaf_a);
     cancelAnimationFrame(this.jellyRaf_b);
     cancelAnimationFrame(this.sandRaf);
+    if (this.sandCleanup) { this.sandCleanup(); this.sandCleanup = null; }
     this.stopBreathTone();
     this.stopAmbience();
     try { if (this.comfort) { this.comfort.pause(); this.comfort = null; } } catch (e) {}
@@ -2492,27 +2497,38 @@ class Component extends DCLogic {
 
   /* ---------- sensory load ---------- */
   addLoad(n) {
+    /* The updater must stay pure — React can invoke it more than once per update,
+       which would fire the nudge twice. Schedule the side effect from the callback. */
+    let nudge = false;
     this.setState(s => {
       const load = Math.max(0, Math.min(100, s.load + n));
       if (load > (s.peak || 0)) s = { ...s, peak: load };
       const overloadInvite = load >= 100 && !s.inviteDismissed ? true : s.overloadInvite;
       if (load >= 70 && !s.chatNudged && !s.chatOpen) {
-        setTimeout(() => this.nudgeChat(), 400);
+        nudge = true;
         return { load, peak: Math.max(s.peak || 0, load), overloadInvite, chatNudged: true };
       }
       return { load, peak: Math.max(s.peak || 0, load), overloadInvite };
-    });
+    }, () => { if (nudge) { clearTimeout(this.nudgeTimer); this.nudgeTimer = setTimeout(() => this.nudgeChat(), 400); } });
   }
 
   startExposure() {
     clearInterval(this.exposureTimer);
     this.exposureStart = Date.now();
     this.setState({ countdown: 10, countdownRun: true });
+    this.exposureLast = this.exposureStart;
     this.exposureTimer = setInterval(() => {
-      const el = (Date.now() - this.exposureStart) / 1000;
+      const now = Date.now();
+      const el = (now - this.exposureStart) / 1000;
       const left = Math.max(0, Math.ceil(10 - el));
       if (this.state.countdown !== left) this.setState({ countdown: left });
-      if (el > 5) this.addLoad(2);
+      /* +2 per SECOND of unhandled exposure, measured from the clock so the 500ms
+         tick rate (needed for a smooth countdown) cannot double the escalation. */
+      if (el > 5) {
+        const dt = (now - this.exposureLast) / 1000;
+        this.addLoad(2 * dt);
+      }
+      this.exposureLast = now;
     }, 500);
   }
 
@@ -2565,12 +2581,31 @@ class Component extends DCLogic {
   }
 
   /* one-shot scene sounds, all synthesized so nothing extra has to load */
+  /* Shared, limited output bus for all one-shot effects. */
+  sfxBus(ac) {
+    if (this.sfxOut && this.sfxOutCtx === ac) return this.sfxOut;
+    try {
+      const comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -10; comp.knee.value = 14; comp.ratio.value = 14;
+      comp.attack.value = 0.003; comp.release.value = 0.16;
+      comp.connect(ac.destination);
+      this.sfxOut = comp; this.sfxOutCtx = ac;
+      return comp;
+    } catch (e) { return ac.destination; }
+  }
+
   sfx(kind) {
     const ac = this.audioCtx();
     if (!ac) return;
     const g0 = this.sfxGain(0.2);
     if (g0 <= 0) return;
+    /* Cap concurrency: beyond a handful of overlapping one-shots the result is mud,
+       not information, and each extra voice only adds to the peak. */
     const now = ac.currentTime;
+    this.sfxVoices = (this.sfxVoices || []).filter(t => t > now);
+    if (this.sfxVoices.length >= 6) return;
+    this.sfxVoices.push(now + 1.6);
+    const out = this.sfxBus(ac);
     const tone = (hz, t0, dur, vol, type) => {
       const o = ac.createOscillator(), g = ac.createGain();
       o.type = type || 'sine';
@@ -2578,7 +2613,7 @@ class Component extends DCLogic {
       g.gain.setValueAtTime(0, now + t0);
       g.gain.linearRampToValueAtTime(g0 * vol, now + t0 + 0.02);
       g.gain.exponentialRampToValueAtTime(0.0001, now + t0 + dur);
-      o.connect(g); g.connect(ac.destination);
+      o.connect(g); g.connect(out);
       o.start(now + t0); o.stop(now + t0 + dur + 0.05);
     };
     const noise = (t0, dur, vol, lo, hi) => {
@@ -2593,7 +2628,7 @@ class Component extends DCLogic {
       g.gain.setValueAtTime(0, now + t0);
       g.gain.linearRampToValueAtTime(g0 * vol, now + t0 + 0.04);
       g.gain.exponentialRampToValueAtTime(0.0001, now + t0 + dur);
-      src.connect(bp); bp.connect(g); g.connect(ac.destination);
+      src.connect(bp); bp.connect(g); g.connect(out);
       src.start(now + t0); src.stop(now + t0 + dur + 0.05);
     };
 
@@ -2643,7 +2678,7 @@ class Component extends DCLogic {
       const lfo = ac.createOscillator(); lfo.frequency.value = spec.lfo;
       const amt = ac.createGain(); amt.gain.value = spec.amt;
       lfo.connect(amt); amt.connect(flt.frequency); lfo.start();
-      src.connect(flt); flt.connect(g); g.connect(ac.destination); src.start();
+      src.connect(flt); flt.connect(g); g.connect(this.sfxBus(ac)); src.start();
       this.ambNodes = [src, lfo];
       this.ambGain = g;
       this.ambKind = kind;
@@ -2676,22 +2711,28 @@ class Component extends DCLogic {
 
   chime(quick) {
     try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC || !this.state.sfxOn) return;
-      if (!this.actx) this.actx = new AC();
-      if (this.actx.state === 'suspended') { const r = this.actx.resume(); if (r && r.catch) r.catch(() => {}); }
+      if (!this.state.sfxOn) return;
+      const ac = this.audioCtx();
+      if (!ac) return;
       const muted = this.state.quiet && this.state.quietChoice === 'mute';
       const vol = muted ? 0 : (this.state.sfxVol / 100) * 0.13;
       if (vol <= 0) return;
-      const now = this.actx.currentTime;
+      const now = ac.currentTime;
+      /* Shares the effects bus and the voice cap: a correct card tap fires an action
+         cue AND this chime, and four staggered notes summing outside a limiter is
+         exactly what clips. */
+      this.sfxVoices = (this.sfxVoices || []).filter(t => t > now);
+      if (this.sfxVoices.length >= 6) return;
+      const out = this.sfxBus(ac);
       const notes = quick ? [523.3, 659.3, 784, 1046.5] : [523.3, 659.3, 784];
+      notes.forEach((_, i) => this.sfxVoices.push(now + i * 0.11 + 0.46));
       notes.forEach((hz, i) => {
-        const o = this.actx.createOscillator(), g = this.actx.createGain();
+        const o = ac.createOscillator(), g = ac.createGain();
         o.type = 'sine'; o.frequency.setValueAtTime(hz, now + i * 0.11);
         g.gain.setValueAtTime(0, now + i * 0.11);
         g.gain.linearRampToValueAtTime(vol, now + i * 0.11 + 0.04);
         g.gain.linearRampToValueAtTime(0, now + i * 0.11 + 0.42);
-        o.connect(g); g.connect(this.actx.destination);
+        o.connect(g); g.connect(out);
         o.start(now + i * 0.11); o.stop(now + i * 0.11 + 0.45);
       });
     } catch (e) {}
@@ -2822,88 +2863,122 @@ class Component extends DCLogic {
     return COMFORT[this.comfortIdx];
   }
 
+  /* These files are served without Content-Length, so the <audio> element reports
+     duration Infinity and cannot seek reliably — which is why the male clip (9.3s of
+     leading silence) played nothing. Decoding once and playing an exact buffer slice
+     removes seeking from the picture entirely. */
+  async comfortBuffer(url) {
+    this.comfortCache = this.comfortCache || {};
+    if (this.comfortCache[url]) return this.comfortCache[url];
+    const ac = this.audioCtx();
+    if (!ac) throw new Error('no audio context');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('fetch ' + res.status);
+    const bytes = await res.arrayBuffer();
+    const buf = await new Promise((resolve, reject) => {
+      const p = ac.decodeAudioData(bytes, resolve, reject);
+      if (p && p.then) p.then(resolve, reject);
+    });
+    this.comfortCache[url] = buf;
+    return buf;
+  }
+
   playComfort(src, flag, gain, from, to) {
     const key = flag || 'comfortOn';
     const url = src || 'audio/calm-voice.mp3';
-    this.comfortGain = gain == null ? 1 : gain;
-    try {
-      if (this.comfort && !this.comfort.paused) {
-        const same = this.comfortKey === key && this.comfortSrc === url;
-        this.stopComfort();
-        if (same) return;
-      }
-      this.silenceVoices('comfort');
+    const level = gain == null ? 1 : gain;
 
-      /* One element for the whole pool: createMediaElementSource may only be
-         called once per element, and reusing it keeps the graph stable. */
-      if (!this.comfort) {
-        this.comfort = new Audio();
-        this.comfort.preload = 'auto';
-        this.comfort.onended = () => this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false });
-        this.comfort.onerror = () => this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false, ttsNote: '搵唔到小音把聲嘅檔案。' });
-      }
-      if (this.comfortSrc !== url) { this.comfort.src = url; this.comfortSrc = url; }
-      this.comfortKey = key;
+    const playing = !!(this.comfortSource || (this.comfort && !this.comfort.paused));
+    if (playing) {
+      const same = this.comfortKey === key && this.comfortSrc === url;
+      this.stopComfort();
+      if (same) return;
+    }
+    this.silenceVoices('comfort');
 
-      /* Gain lives on a GainNode, which accepts values above 1, so the
-         per-clip level compensation still applies at full sfxVol. */
-      const ac = this.audioCtx();
-      if (ac && !this.comfortNode) {
-        try {
-          this.comfortNode = ac.createMediaElementSource(this.comfort);
-          this.comfortAmp = ac.createGain();
-          /* Boosted clips (the male reading runs 2.57x) can exceed 1.0 on true peaks.
-             A soft limiter keeps them from hard-clipping into a harsh transient. */
-          const comp = ac.createDynamicsCompressor();
-          comp.threshold.value = -8;
-          comp.knee.value = 12;
-          comp.ratio.value = 12;
-          comp.attack.value = 0.004;
-          comp.release.value = 0.18;
-          this.comfortNode.connect(this.comfortAmp);
-          this.comfortAmp.connect(comp);
-          comp.connect(ac.destination);
-        } catch (e) { this.comfortAmp = null; }
-      }
-      const muted = this.state.quiet && this.state.quietChoice === 'mute';
-      const base = Math.max(0.15, this.state.sfxVol / 100);
-      if (this.comfortAmp) {
-        this.comfort.volume = 1;
-        this.comfortAmp.gain.value = muted ? 0 : base * this.comfortGain;
-      } else {
-        /* No Web Audio: fall back to the element, accepting the 1.0 ceiling. */
-        this.comfort.volume = muted ? 0 : Math.max(0, Math.min(1, base * this.comfortGain));
-      }
+    this.comfortKey = key;
+    this.comfortSrc = url;
+    const token = (this.comfortToken || 0) + 1;
+    this.comfortToken = token;
 
-      /* Seek past any leading silence, and stop at `to` when a window is given. */
-      const seekTo = from || 0;
-      const seek = () => { try { this.comfort.currentTime = seekTo; } catch (e) {} };
-      if (this.comfort.readyState >= 1) seek();
-      else this.comfort.addEventListener('loadedmetadata', seek, { once: true });
+    const muted = this.state.quiet && this.state.quietChoice === 'mute';
+    const base = Math.max(0.15, this.state.sfxVol / 100);
+    /* resume() must be requested inside the tap handler for the context to unlock. */
+    const ac = this.audioCtx();
 
-      if (this.comfortStop) this.comfort.removeEventListener('timeupdate', this.comfortStop);
-      this.comfortStop = null;
-      if (to) {
-        this.comfortStop = () => { if (this.comfort && this.comfort.currentTime >= to) this.stopComfort(); };
-        this.comfort.addEventListener('timeupdate', this.comfortStop);
-      }
+    this.setState({ comfortOn: key === 'comfortOn', sampleOn: key === 'sampleOn', cantoOn: key === 'cantoOn', greetOn: key === 'greetOn', ttsOn: false });
 
-      const p = this.comfort.play();
-      if (p && p.catch) p.catch(() => this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false, ttsNote: '撳多一次就播到。' }));
-      this.setState({ comfortOn: key === 'comfortOn', sampleOn: key === 'sampleOn', cantoOn: key === 'cantoOn', greetOn: key === 'greetOn', ttsOn: false });
-    } catch (e) { this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false }); }
+    const done = () => { if (this.comfortToken === token) this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false }); };
+
+    if (ac) {
+      this.comfortBuffer(url).then(buf => {
+        if (this.comfortToken !== token) return;
+        const offset = Math.max(0, Math.min(from || 0, Math.max(0, buf.duration - 0.05)));
+        const span = (to && to > offset) ? Math.min(to - offset, buf.duration - offset) : null;
+        const source = ac.createBufferSource();
+        source.buffer = buf;
+        const amp = ac.createGain();
+        amp.gain.value = muted ? 0 : base * level;
+        /* Boosted clips (the male reading runs 2.57x) can exceed 1.0 on true peaks;
+           a soft limiter keeps that from clipping into a harsh transient. */
+        const comp = ac.createDynamicsCompressor();
+        comp.threshold.value = -8; comp.knee.value = 12; comp.ratio.value = 12;
+        comp.attack.value = 0.004; comp.release.value = 0.18;
+        source.connect(amp); amp.connect(comp); comp.connect(ac.destination);
+        source.onended = () => { if (this.comfortSource === source) this.comfortSource = null; done(); };
+        try { span == null ? source.start(0, offset) : source.start(0, offset, span); }
+        catch (e) { try { source.start(0); } catch (e2) {} }
+        this.comfortSource = source;
+      }).catch(() => {
+        if (this.comfortToken !== token) return;
+        this.playComfortElement(url, token, base * level, muted, from, to, done);
+      });
+      return;
+    }
+    this.playComfortElement(url, token, base * level, muted, from, to, done);
   }
-  stopComfort() {
+
+  /* Fallback for engines without usable Web Audio: element playback, accepting the
+     1.0 volume ceiling and the unreliable seek. */
+  playComfortElement(url, token, vol, muted, from, to, done) {
     try {
-      if (this.comfort) {
-        if (this.comfortStop) { this.comfort.removeEventListener('timeupdate', this.comfortStop); this.comfortStop = null; }
-        this.comfort.pause();
-        this.comfort.currentTime = 0;
+      if (!this.comfort) { this.comfort = new Audio(); this.comfort.preload = 'auto'; }
+      this.comfort.onended = done;
+      this.comfort.onerror = () => { if (this.comfortToken === token) this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false, ttsNote: '搵唔到小音把聲嘅檔案。' }); };
+      if (this.comfortElSrc !== url) { this.comfort.src = url; this.comfortElSrc = url; }
+      this.comfort.volume = muted ? 0 : Math.max(0, Math.min(1, vol));
+      const after = () => {
+        if (this.comfortToken !== token || !this.comfort) return;
+        if (from > 0) { try { this.comfort.currentTime = from; } catch (e) {} }
+        clearTimeout(this.comfortWindow);
+        if (to && to > (from || 0)) {
+          this.comfortWindow = setTimeout(() => { if (this.comfortToken === token) this.stopComfort(); }, Math.max(120, (to - (from || 0)) * 1000));
+        }
+      };
+      const p = this.comfort.play();
+      if (p && p.then) {
+        p.then(() => { try { after(); } catch (e) {} }, () => {
+          if (this.comfortToken !== token) return;
+          this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false, ttsNote: '撳多一次就播到。' });
+        });
+      } else { after(); }
+    } catch (e) { done(); }
+  }
+
+  stopComfort() {
+    clearTimeout(this.comfortWindow);
+    clearTimeout(this.comfortArm);
+    this.comfortToken = (this.comfortToken || 0) + 1;
+    try {
+      if (this.comfortSource) {
+        this.comfortSource.onended = null;
+        this.comfortSource.stop();
       }
     } catch (e) {}
+    this.comfortSource = null;
+    try { if (this.comfort) { this.comfort.pause(); this.comfort.currentTime = 0; } } catch (e) {}
     this.setState({ comfortOn: false, sampleOn: false, cantoOn: false, greetOn: false });
   }
-
   speak(text, toneId) {
     const prof = VOICE[toneId] || { rate: 0.8, pitch: 0.95 };
     this.silenceVoices('tts');
@@ -2915,7 +2990,9 @@ class Component extends DCLogic {
         || voices.find(x => /zh-HK|yue/i.test(x.lang))
         || voices.find(x => /zh/i.test(x.lang));
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = v && /zh-HK|yue/i.test(v.lang) ? 'zh-HK' : 'zh-TW';
+      /* lang must follow the CHOSEN voice: pinning it to zh-TW made every zh-CN pick
+         a voice/lang mismatch, which engines answer by ignoring it or staying silent. */
+      u.lang = v ? v.lang : 'zh-HK';
       if (v) u.voice = v;
       u.rate = prof.rate;
       u.pitch = prof.pitch;
@@ -2925,7 +3002,7 @@ class Component extends DCLogic {
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
       this.setState({ ttsOn: true });
-      this.setState({ ttsNote: v && /zh-HK|yue/i.test(v.lang) ? '' : '此裝置未安裝廣東話語音，暫用中文語音朗讀。' });
+      this.setState({ ttsNote: !v ? '此裝置未搵到中文語音。' : (/zh-HK|yue/i.test(v.lang) || this.state.voiceName) ? '' : '此裝置未安裝廣東話語音，暫用中文語音朗讀。' });
     } catch (e) {
       this.setState({ ttsNote: '語音朗讀暫時用唔到，唔影響你玩。' });
     }
@@ -3080,45 +3157,116 @@ class Component extends DCLogic {
     return acts.slice(0, 3);
   }
 
+  /* ── AI provider ──────────────────────────────────────────────────────────────
+     Anthropic via the built-in window.claude.complete. Chosen over Gemini/OpenAI/Groq
+     for THIS app specifically: no API key ships in client source (the Gemini key was
+     readable by anyone who opened the page), no per-project free-tier ceiling to
+     exhaust mid-demo (Gemini was returning 429), and no browser CORS problem — the
+     Anthropic REST API refuses direct browser calls, so a raw fetch would need a proxy.
+     Latency is one round trip; the perceived-speed work is done by the reveal below. */
+
+  askAI(system, history, text, ms) {
+    const payload = { system: system, max_tokens: 420, messages: [...history, { role: 'user', content: text }] };
+    const flat = () => system + '\n\n[對話紀錄]\n'
+      + history.map(m => (m.role === 'user' ? '小朋友：' : '小音：') + m.content).join('\n')
+      + '\n小朋友：' + text + '\n小音：';
+    const race = (pr, t) => Promise.race([
+      pr, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), t))
+    ]);
+    return race(Promise.resolve(window.claude.complete(payload)), ms)
+      .then(r => String(r || '').trim())
+      .then(r => { if (!r) throw new Error('empty'); return r; })
+      /* Some builds only accept a single prompt string; retry in that shape. */
+      .catch(() => race(Promise.resolve(window.claude.complete(flat())), Math.round(ms * 0.8))
+        .then(r => String(r || '').trim())
+        .then(r => { if (!r) throw new Error('empty'); return r; }));
+  }
+
+  /* Reveals a finished reply a few characters at a time. window.claude.complete has no
+     token stream, so this is a presentation layer, not real streaming — it exists so the
+     child sees movement instead of a wall of text appearing at once. It runs on a timer
+     (never a loop), so it cannot block input, audio or the render. */
+  revealReply(id, full, toneId) {
+    clearInterval(this.revealTimer);
+    const instant = this.state.quiet || this.prefersReduced();
+    const finish = () => {
+      clearInterval(this.revealTimer);
+      this.revealTimer = null;
+      this.setState(s => ({
+        messages: s.messages.map(m => m.id === id
+          ? { ...m, text: full, revealing: false, acts: this.parseActs(full) } : m)
+      }));
+    };
+    /* Quiet Mode and reduced-motion get the text at once: animation is the thing they
+       asked the interface to stop doing. */
+    if (instant || full.length <= 24) { finish(); return; }
+    let i = 0;
+    const step = Math.max(2, Math.round(full.length / 40));
+    this.revealTimer = setInterval(() => {
+      i += step;
+      if (i >= full.length) { finish(); return; }
+      const shown = full.slice(0, i);
+      this.setState(s => ({ messages: s.messages.map(m => m.id === id ? { ...m, text: shown } : m) }));
+    }, 45);
+  }
+
+  prefersReduced() {
+    try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+    catch (e) { return false; }
+  }
+
+  pushAI(full, toneId, isError) {
+    const id = 'm' + Date.now() + Math.random().toString(36).slice(2, 6);
+    this.setState(s => ({
+      messages: [...s.messages, { id: id, role: 'ai', text: '', full: full, tone: toneId, isError: !!isError, revealing: true, acts: [] }]
+    }), () => this.revealReply(id, full, toneId));
+  }
+
   sendChat = async () => {
     const text = (this.state.chatInput || '').trim();
     if (!text || this.state.chatBusy) return;
-    const userMsg = { role: 'user', text };
-    this.setState(s => ({ messages: [...s.messages, userMsg], chatInput: '', chatBusy: true }));
 
-    if (SAFETY_WORDS.some(w => text.includes(w))) {
-      setTimeout(() => this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: SAFETY_REPLY, tone: 'safety' }], chatBusy: false })), 400);
-      return;
+    /* Any in-flight reveal is completed immediately, so a new turn never races an old
+       one for the same message list. */
+    if (this.revealTimer) {
+      clearInterval(this.revealTimer);
+      this.revealTimer = null;
+      this.setState(s => ({ messages: s.messages.map(m => m.revealing ? { ...m, text: m.full || m.text, revealing: false, acts: this.parseActs(m.full || m.text) } : m) }));
     }
 
-    const toneId = this.state.tone === 'auto' ? this.detectTone(text) : this.state.tone;
-    const tone = TONES.find(t => t.id === toneId);
-    const history = this.state.messages.filter(m => !m.isError).slice(-8)
-      .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
-    const system = this.buildSystemPrompt(toneId, tone);
-    const payload = { system: system, max_tokens: 420, messages: [...history, { role: 'user', content: text }] };
+    this.setState(s => ({ messages: [...s.messages, { role: 'user', text: text }], chatInput: '', chatBusy: true }));
 
-    let out = '', failed = false;
+    /* Everything after the lock is taken sits inside try/finally: chatBusy gates send,
+       Enter and every quick-reply chip, so a throw anywhere here would silently disable
+       the whole composer with no error and no recovery short of a reload. */
+    let toneId = this.state.tone === 'auto' ? 'gentle' : this.state.tone;
     try {
-      out = String((await window.claude.complete(payload)) || '').trim();
-    } catch (e1) {
-      try {
-        const flat = system + '\n\n[對話紀錄]\n'
-          + history.map(m => (m.role === 'user' ? '小朋友：' : '小音：') + m.content).join('\n')
-          + '\n小朋友：' + text + '\n小音：';
-        out = String((await window.claude.complete(flat)) || '').trim();
-      } catch (e2) { failed = true; }
-    }
-    if (!out) failed = true;
+      if (SAFETY_WORDS.some(w => text.includes(w))) {
+        await new Promise(r => setTimeout(r, 400));
+        this.pushAI(SAFETY_REPLY, 'safety');
+        return;
+      }
 
-    if (failed) {
-      const msg = this.offlineReply(toneId);
-      this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: msg, tone: toneId, isError: true, acts: this.parseActs(msg) }], chatBusy: false }));
-      return;
+      toneId = this.state.tone === 'auto' ? this.detectTone(text) : this.state.tone;
+      const tone = TONES.find(t => t.id === toneId);
+      const history = this.state.messages.filter(m => !m.isError).slice(-8)
+        .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.full || m.text }));
+      const system = this.buildSystemPrompt(toneId, tone);
+
+      let out = '';
+      try { out = await this.askAI(system, history, text, 20000); } catch (e1) { out = ''; }
+
+      if (!out) { this.pushAI(this.offlineReply(toneId), toneId, true); return; }
+      this.pushAI(out, toneId);
+    } catch (e) {
+      /* Never leave the child staring at a dead composer. */
+      let msg = '我一時間諗唔到點答，唔好意思。\n💡現在可以試試：慢慢吸一口氣，再同我講多次。';
+      try { msg = this.offlineReply(toneId); } catch (e2) {}
+      this.pushAI(msg, toneId, true);
+    } finally {
+      this.setState({ chatBusy: false });
     }
-    this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: out, tone: toneId, acts: this.parseActs(out) }], chatBusy: false }));
   };
-
   /* Rebuilt every turn: mode, load and quiet state genuinely change the reply. */
   buildSystemPrompt(toneId, tone) {
     const s = this.state;
@@ -3398,24 +3546,25 @@ class Component extends DCLogic {
 
   breathTone(inhale) {
     try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return;
-      if (!this.actx) this.actx = new AC();
-      if (this.actx.state === 'suspended') { const r = this.actx.resume(); if (r && r.catch) r.catch(() => {}); }
+      const ac = this.audioCtx();
+      if (!ac) return;
       const muted = this.state.quiet && this.state.quietChoice === 'mute';
       const vol = muted ? 0 : (this.state.sfxVol / 100) * 0.16;
       if (vol <= 0) return;
-      const now = this.actx.currentTime;
+      const now = ac.currentTime;
       const dur = inhale ? 4 : 8;
-      const o = this.actx.createOscillator();
-      const g = this.actx.createGain();
+      /* Limited, but deliberately not counted against the one-shot cap: an 8s exhale
+         would otherwise silence every interface sound for its full length. */
+      const out = this.sfxBus(ac);
+      const o = ac.createOscillator();
+      const g = ac.createGain();
       o.type = 'sine';
       o.frequency.setValueAtTime(inhale ? 196 : 174.6, now);
       o.frequency.linearRampToValueAtTime(inhale ? 261.6 : 130.8, now + dur);
       g.gain.setValueAtTime(0, now);
       g.gain.linearRampToValueAtTime(vol, now + Math.min(1.2, dur * 0.3));
       g.gain.linearRampToValueAtTime(0, now + dur);
-      o.connect(g); g.connect(this.actx.destination);
+      o.connect(g); g.connect(out);
       o.start(now); o.stop(now + dur + 0.05);
       this.breathOsc = o;
     } catch (e) {}
@@ -3427,6 +3576,9 @@ class Component extends DCLogic {
 
   sandRef = (node) => {
     cancelAnimationFrame(this.sandRaf);
+    /* React calls the ref with null on unmount: tear the previous listeners down there,
+       otherwise every visit to the Sanctuary leaves another window listener behind. */
+    if (this.sandCleanup) { this.sandCleanup(); this.sandCleanup = null; }
     if (!node) return;
     const ctx = node.getContext('2d');
     const W = node.width, H = node.height;
@@ -3437,12 +3589,21 @@ class Component extends DCLogic {
       const t = e.touches ? e.touches[0] : e;
       return { x: (t.clientX - r.left) * (W / r.width), y: (t.clientY - r.top) * (H / r.height) };
     };
-    const down = (e) => { drawing = true; const p = pos(e); pts.push({ ...p, a: 1, r: 9 }); e.preventDefault(); };
-    const move = (e) => { if (!drawing) return; const p = pos(e); pts.push({ ...p, a: 1, r: 9 }); e.preventDefault(); };
+    const down = (e) => { drawing = true; push(pos(e)); e.preventDefault(); };
+    const MAX_PTS = 900;   /* ~7s of continuous drawing; beyond this the oldest fade out early */
+    const push = (p) => { pts.push({ ...p, a: 1, r: 9 }); if (pts.length > MAX_PTS) pts.splice(0, pts.length - MAX_PTS); };
+    const move = (e) => { if (!drawing) return; push(pos(e)); e.preventDefault(); };
     const up = () => { drawing = false; };
     node.addEventListener('pointerdown', down);
     node.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    this.sandCleanup = () => {
+      node.removeEventListener('pointerdown', down);
+      node.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
     const loop = () => {
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = '#3f3225';
@@ -3692,11 +3853,11 @@ class Component extends DCLogic {
       toneLabel: m.role === 'ai' && m.tone ? (VOICE[m.tone] || VOICE.gentle).label : '',
       toneChip: m.role === 'ai' && m.tone ? (VOICE[m.tone] || VOICE.gentle).chip : 'var(--color-neutral-600, #82796a)',
       hasTone: m.role === 'ai' && !!m.tone,
-      canSave: m.role === 'ai' && i > 0,
+      canSave: m.role === 'ai' && i > 0 && !m.revealing,
       acts: (m.acts || []).map(a => ({ ...a, run: () => this.runAct(a.k) })),
-      hasActs: !!(m.acts && m.acts.length),
-      save: () => { this.addToToolbox({ kind: 'AI 建議', name: '小窩嘅提醒 ' + (i + 1), desc: m.text }); this.setState({ copyMsg: '' }); },
-      speak: () => this.speak(m.text.replace(/💡/g, ''), m.tone)
+      hasActs: !!(m.acts && m.acts.length) && !m.revealing,
+      save: () => { this.addToToolbox({ kind: 'AI 建議', name: '小窩嘅提醒 ' + (i + 1), desc: m.full || m.text }); this.setState({ copyMsg: '' }); },
+      speak: () => this.speak((m.full || m.text).replace(/💡/g, ''), m.tone)
     }));
 
     const dash = this.buildDash();
